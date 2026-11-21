@@ -33,14 +33,12 @@ function estudia_quiz_admin() {
 			<p><label><input type="checkbox" name="delete_key" value="1"> Eliminar la clave guardada</label></p>
 			<?php submit_button(); ?>
 		</form>
-		<h2>Importar preguntas revisadas</h2>
-		<p>Sube un conjunto JSON preparado a partir del PDF y su clave. Revisa la procedencia, las opciones y la explicación antes de la importación.</p>
-		<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<input type="hidden" name="action" value="estudia_quiz_import">
-			<?php wp_nonce_field( 'estudia_quiz_import' ); ?>
-			<label>Archivo JSON <input type="file" name="bank" accept=".json,application/json" required></label>
-			<?php submit_button( 'Importar' ); ?>
-		</form>
+		<h2>Importar preguntas</h2>
+		<?php if ( function_exists( 'estudia_ehep_import_screen' ) ) : ?>
+			<p><a href="<?php echo esc_url( admin_url( 'edit.php?post_type=estudia_ehep_item&page=estudia-ehep-import' ) ); ?>">Previsualizar y guardar una importación como borrador</a></p>
+		<?php else : ?>
+			<p>Activa EstudiaMed EHEP para usar el importador editorial.</p>
+		<?php endif; ?>
 	</div>
 	<?php
 }
@@ -79,32 +77,6 @@ add_action( 'admin_post_estudia_quiz_settings', static function () {
 
 add_action( 'admin_post_estudia_quiz_import', static function () {
 	estudia_quiz_admin_guard( 'estudia_quiz_import' );
-	$file = $_FILES['bank'] ?? array();
-	if ( UPLOAD_ERR_OK !== ( $file['error'] ?? -1 ) || ( $file['size'] ?? 0 ) > 2000000 || ! is_uploaded_file( $file['tmp_name'] ) ) {
-		estudia_quiz_admin_finish( false );
-	}
-	$items = json_decode( (string) file_get_contents( $file['tmp_name'] ), true );
-	if ( ! is_array( $items ) || ! $items || count( $items ) > 500 ) {
-		estudia_quiz_admin_finish( false );
-	}
-	$bank = get_option( 'estudia_quiz_bank', array() );
-	foreach ( $items as $raw ) {
-		$item = estudia_quiz_item( $raw );
-		$lang = $raw['lang'] ?? '';
-		$type = $raw['type'] ?? '';
-		$category = $raw['category'] ?? '';
-		$subject = $raw['subject'] ?? '';
-		$source = $raw['source'] ?? '';
-		if ( ! $item || ! in_array( $lang, array( 'es', 'pt' ), true ) || ! in_array( $type, array( 'case', 'mcq' ), true ) ||
-			! is_string( $category ) || ! is_string( $subject ) || ! in_array( $subject, estudia_quiz_catalog( $lang )[ $category ] ?? array(), true ) ||
-			! is_string( $source ) || ! trim( $source ) ) {
-			estudia_quiz_admin_finish( false );
-		}
-		$item += array( 'lang' => $lang, 'type' => $type, 'category' => $category, 'subject' => $subject,
-			'topic' => sanitize_text_field( $raw['topic'] ?? '' ) ?: 'Sin tema asignado',
-			'source' => sanitize_text_field( $source ), 'origin' => 'bank' );
-		$bank[ hash( 'sha256', wp_json_encode( array( $lang, $type, $category, $subject, $item['stem'] ) ) ) ] = $item;
-	}
-	update_option( 'estudia_quiz_bank', $bank, false );
-	estudia_quiz_admin_finish( true );
+	wp_safe_redirect( admin_url( 'edit.php?post_type=estudia_ehep_item&page=estudia-ehep-import' ) );
+	exit;
 } );

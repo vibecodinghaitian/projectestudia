@@ -11,6 +11,7 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
   let secondsTimer;
   let end = 0;
   let busy = false;
+  let referencedTopic = new URLSearchParams(location.search).get('tema');
 
   function element(tag, text, className) {
     const node = document.createElement(tag);
@@ -90,7 +91,8 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
       for (const control of form.querySelectorAll('button')) control.disabled = count === 0;
     }
     function refreshTopics() {
-      const previousTopic = topic.value;
+      const previousTopic = referencedTopic || topic.value;
+      referencedTopic = null;
       const choices = Object.entries(topicsForSelection());
       topic.replaceChildren(new Option('Todos los temas', ''));
       for (const [name, total] of choices) topic.add(new Option(name + ' (' + total + ')', name));
@@ -238,10 +240,11 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
     });
     body.append(list);
     const clinical = item.clinical;
+    if (!clinical && item.explanation) body.append(element('p', item.explanation));
     if (clinical) {
       body.append(element('p', 'Respuesta del banco CACES · Página ' + clinical.pagina + ' · ' + clinical.caces));
       if (clinical.segunGuia) {
-        body.append(element('p', 'Respuesta según la guía · ' + clinical.segunGuia));
+        body.append(element('p', (clinical.estado === 'Corrección editorial' ? 'Clave editorial · ' : 'Respuesta según la guía · ') + clinical.segunGuia));
       }
       body.append(element('p', 'Estado de revisión · ' + clinical.estado));
       body.append(element('p', clinical.explicacion || 'La clave coincide con el PDF de 2023. La explicación clínica está pendiente de verificar.'));

@@ -37,7 +37,7 @@ function estudia_quiz_bank() {
 	foreach ( get_option( 'estudia_quiz_bank', array() ) as $id => $item ) {
 		$items[] = $item + array( 'id' => (string) $id, 'topic' => 'Sin tema asignado' );
 	}
-	return $items;
+	return apply_filters( 'estudia_quiz_editorial_items', $items );
 }
 
 function estudia_quiz_topics( $lang ) {

@@ -225,6 +225,12 @@
 const topicQuery = document.getElementById('topic-query');
 if (topicQuery) {
   const groups = document.querySelectorAll('.topic-subject');
+  function revealLinkedTopic() {
+    const topic = document.getElementById(location.hash.slice(1));
+    if (topic?.classList.contains('topic-item')) topic.open = true;
+  }
+  revealLinkedTopic();
+  window.addEventListener('hashchange', revealLinkedTopic);
   const normalize = text => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   topicQuery.addEventListener('input', () => {
     const query = normalize(topicQuery.value.trim());

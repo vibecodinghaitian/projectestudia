@@ -1,5 +1,6 @@
 <?php $ehep_url = function_exists( 'estudiamed_ehep_url' ) ? estudiamed_ehep_url() : ''; ?>
 <div class="landing-top wrap">
+  <?php if ( function_exists( 'estudia_campus_announcements' ) ) { estudia_campus_announcements( 'home' ); } ?>
   <section class="hero" aria-labelledby="intro">
     <div class="hero-copy">
       <p class="eyebrow"><?php echo esc_html( estudiamed_translate( 'Preparação para exames médicos', 'Preparación para exámenes médicos' ) ); ?></p>
@@ -64,3 +65,19 @@
   <header><h2><?php echo esc_html( estudiamed_translate( 'Meu progresso no Revalida', 'Mi progreso en Revalida' ) ); ?></h2><p><?php echo esc_html( estudiamed_translate( 'Seu histórico de sessões concluídas neste navegador.', 'Tu historial de sesiones completadas en este navegador.' ) ); ?></p></header>
   <div id="metricas" class="metrics"></div>
 </section>
+
+<section class="section wrap">
+  <h2>Prueba una pregunta</h2>
+  <details class="panel">
+    <summary>Un estudio sigue a 200 personas inicialmente sanas. En un año aparecen 20 casos. ¿Cuál es el riesgo acumulado?</summary>
+    <p><strong>Respuesta: 10 %.</strong> Se divide el número de casos nuevos (20) por las personas en riesgo al inicio (200). El resultado, 0,10, equivale al 10 %.</p>
+    <p>Muestra original de EstudiaMed.</p>
+  </details>
+</section>
+<?php if ( function_exists( 'estudia_campus_posts' ) ) : ?>
+<section class="section wrap">
+  <h2>Artículos recientes</h2>
+  <?php estudia_campus_posts( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 3 ) ) ); ?>
+  <p><a href="<?php echo esc_url( estudia_campus_url( 'blog' ) ); ?>">Ver todos los artículos</a></p>
+</section>
+<?php endif; ?>

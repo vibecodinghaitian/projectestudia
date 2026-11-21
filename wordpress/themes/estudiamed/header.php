@@ -23,9 +23,18 @@
       <?php endif; ?>
       <a href="<?php echo esc_url( estudiamed_home( '#praticar' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Praticar', 'Practicar' ) ); ?></a>
       <a href="<?php echo esc_url( estudiamed_home( '#progresso' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Progresso', 'Progreso' ) ); ?></a>
+      <?php if ( function_exists( 'estudia_campus_url' ) ) : ?><a href="<?php echo esc_url( estudia_campus_url( 'blog' ) ); ?>">Blog</a><?php endif; ?>
     </nav>
     <div class="header-tools">
-    <?php if ( is_user_logged_in() ) : ?>
+    <?php if ( function_exists( 'estudia_campus_url' ) ) : ?>
+      <?php if ( is_user_logged_in() ) : ?>
+        <a class="account" href="<?php echo esc_url( estudia_campus_url( 'mi-panel' ) ); ?>">Ir a mi panel</a>
+        <a class="account" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">Cerrar sesión</a>
+      <?php else : ?>
+        <a class="account" href="<?php echo esc_url( estudia_campus_url( 'registro' ) ); ?>">Crear cuenta</a>
+        <a class="account" href="<?php echo esc_url( estudia_campus_url( 'ingresar' ) ); ?>">Iniciar sesión</a>
+      <?php endif; ?>
+    <?php elseif ( is_user_logged_in() ) : ?>
       <a class="account" href="<?php echo esc_url( wp_logout_url( estudiamed_home() ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Sair', 'Salir' ) ); ?></a>
     <?php else : ?>
       <a class="account" href="<?php echo esc_url( wp_login_url( estudiamed_home() ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Entrar', 'Iniciar sesión' ) ); ?></a>

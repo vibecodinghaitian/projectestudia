@@ -167,7 +167,7 @@ function estudiamed_ehep_snapshot( $row ) {
 			$item['image'] = plugins_url( 'assets/question-images/' . $item['image'], ESTUDIAMED_EHEP_FILE );
 		}
 		if ( ! $row['finished'] && ( 'mock' === $row['mode'] || null === $item['selected'] ) ) {
-			unset( $item['key'], $item['reasons'] );
+			unset( $item['key'], $item['reasons'], $item['explanation'], $item['caces_answer'] );
 		} else {
 			$item['clinical'] = estudiamed_ehep_clinical_review( $item );
 		}

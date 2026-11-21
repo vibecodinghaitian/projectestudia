@@ -1,7 +1,7 @@
 /*
 Theme Name: EstudiaMed
 Description: Plataforma de preparação para exames médicos.
-Version: 1.3.0
+Version: 1.4.0
 Requires PHP: 7.4
 Text Domain: estudiamed
 */
@@ -39,3 +39,6 @@ Text Domain: estudiamed
 .topic-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:.75rem;align-items:start}
 .topic-subject{margin:0}.topic-subject h3{margin:0 0 .5rem}.topic-item{border-top:1px solid var(--line);padding:.55rem 0}.topic-item summary{cursor:pointer}.topic-item p,.topic-item li{font-size:.95rem}
 @media(max-width:850px){.top{flex-wrap:wrap}.top>nav{order:3;width:100%;padding-bottom:.7rem;gap:12px 20px}.top .header-tools{margin-left:auto}}
+
+.campus-account{max-width:520px;margin-inline:auto}.campus-account form,.campus-account label{display:grid;gap:.65rem}.campus-account input,.filters input{min-width:0;padding:.65rem;border:1px solid var(--line);border-radius:.55rem}.campus-account .btn{width:fit-content;margin:.4rem 0}
+.campus-article{max-width:840px;margin-inline:auto}.campus-notice img,.campus-article img{display:block;max-width:100%;height:auto}.campus-notice h2{font-size:1.35rem}.campus-notice{border-left:4px solid var(--teal)}

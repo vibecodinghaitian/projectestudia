@@ -8,8 +8,9 @@ function estudiamed_ehep_register_bank() {
 		'show_ui' => true,
 		'show_in_rest' => false,
 		'supports' => array( 'title', 'revisions' ),
-		'capability_type' => 'page',
-		'map_meta_cap' => true,
+		'capabilities' => array_fill_keys( array( 'edit_post', 'read_post', 'delete_post', 'edit_posts', 'edit_others_posts',
+			'publish_posts', 'read_private_posts', 'delete_posts', 'delete_private_posts', 'delete_published_posts',
+			'delete_others_posts', 'edit_private_posts', 'edit_published_posts', 'create_posts' ), 'manage_options' ),
 		'register_meta_box_cb' => 'estudiamed_ehep_register_editor',
 	) );
 }
@@ -22,6 +23,13 @@ function estudiamed_ehep_register_editor() {
 function estudiamed_ehep_editor( $post ) {
 	$item = get_post_meta( $post->ID, '_estudia_ehep', true );
 	wp_nonce_field( 'estudia_ehep_edit', 'estudia_ehep_nonce' );
+	$module = get_post_meta( $post->ID, '_estudia_question_module', true ) ?: 'ehep';
+	echo '<p><label>Módulo <select name="estudia_question_module"><option value="ehep"' . selected( $module, 'ehep', false ) . '>EHEP</option><option value="general"' . selected( $module, 'general', false ) . '>Quiz General</option></select></label></p>';
+	foreach ( array( 'call' => 'Convocatoria', 'category' => 'Categoría de Quiz General', 'type' => 'Tipo (mcq o case)', 'original' => 'ID original EHEP para corregir (p. ej. html-4)' ) as $field => $label ) {
+		echo '<p><label>' . esc_html( $label ) . ' <input name="ehep_' . esc_attr( $field ) . '" value="' . esc_attr( $item[ $field ] ?? '' ) . '"></label></p>';
+	}
+	echo '<p><label>Explicación general <textarea class="large-text" name="ehep_explanation" rows="3">' . esc_textarea( $item['explanation'] ?? '' ) . '</textarea></label></p>';
+	echo '<p><label><input type="checkbox" name="ehep_archived" value="1" ' . checked( ! empty( $item['archived'] ), true, false ) . '> Archivar para intentos futuros</label></p>';
 	echo '<p><label for="ehep_subject">Especialidad</label><br><input class="regular-text" id="ehep_subject" name="ehep_subject" value="' . esc_attr( $item['subject'] ?? '' ) . '"></p>';
 	echo '<p><label for="ehep_topic">Tema</label><br><input class="regular-text" id="ehep_topic" name="ehep_topic" value="' . esc_attr( $item['topic'] ?? '' ) . '"></p>';
 	echo '<p><label for="ehep_source">Fuente o procedencia</label><br><input class="regular-text" id="ehep_source" name="ehep_source" value="' . esc_attr( $item['source'] ?? '' ) . '"></p>';
@@ -32,10 +40,22 @@ function estudiamed_ehep_editor( $post ) {
 		echo '<p><label for="ehep_option_' . esc_attr( $i ) . '">Respuesta</label><br><textarea class="large-text" id="ehep_option_' . esc_attr( $i ) . '" name="ehep_options[' . esc_attr( $i ) . ']" rows="2">' . esc_textarea( $item['options'][ $i ] ?? '' ) . '</textarea></p>';
 		echo '<p><label for="ehep_reason_' . esc_attr( $i ) . '">Explicación</label><br><textarea class="large-text" id="ehep_reason_' . esc_attr( $i ) . '" name="ehep_reasons[' . esc_attr( $i ) . ']" rows="2">' . esc_textarea( $item['reasons'][ $i ] ?? '' ) . '</textarea></p></fieldset>';
 	}
+	$history = get_post_meta( $post->ID, '_estudia_key_log', false );
+	if ( $history ) {
+		echo '<details><summary>Historial editorial</summary><ul>';
+		foreach ( array_reverse( $history ) as $change ) {
+			$previous = $change['before']['key'] ?? -1;
+			$current = $change['after']['key'] ?? -1;
+			echo '<li>' . esc_html( $change['at'] . ' · Clave ' . ( $previous < 0 ? '—' : chr( 65 + $previous ) ) .
+				' → ' . ( $current < 0 ? '—' : chr( 65 + $current ) ) . ' · Usuario ' . $change['user'] ) . '</li>';
+		}
+		echo '</ul></details>';
+	}
+
 }
 
 function estudiamed_ehep_save_item( $id ) {
-	if ( wp_is_post_revision( $id ) || wp_is_post_autosave( $id ) || ! current_user_can( 'edit_post', $id ) ||
+	if ( wp_is_post_revision( $id ) || wp_is_post_autosave( $id ) || ! current_user_can( 'manage_options' ) ||
 		! isset( $_POST['estudia_ehep_nonce'] ) || ! is_string( $_POST['estudia_ehep_nonce'] ) ||
 		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['estudia_ehep_nonce'] ) ), 'estudia_ehep_edit' ) ) {
 		return;
@@ -52,25 +72,24 @@ function estudiamed_ehep_save_item( $id ) {
 		$item['options'][] = sanitize_textarea_field( wp_unslash( $_POST['ehep_options'][ $i ] ?? '' ) );
 		$item['reasons'][] = sanitize_textarea_field( wp_unslash( $_POST['ehep_reasons'][ $i ] ?? '' ) );
 	}
+	foreach ( array( 'call', 'category', 'type', 'original', 'explanation' ) as $field ) {
+		$item[ $field ] = sanitize_textarea_field( wp_unslash( $_POST[ 'ehep_' . $field ] ?? '' ) );
+	}
+	$item['archived'] = isset( $_POST['ehep_archived'] );
+	update_post_meta( $id, '_estudia_question_module', 'general' === ( $_POST['estudia_question_module'] ?? '' ) ? 'general' : 'ehep' );
 	update_post_meta( $id, '_estudia_ehep', wp_slash( $item ) );
 }
 add_action( 'save_post_estudia_ehep_item', 'estudiamed_ehep_save_item' );
 
-function estudiamed_ehep_bank() {
-	$items = require __DIR__ . '/practice.php';
-	$imported = require dirname( __DIR__ ) . '/data/html-practice.php';
-	$items = array_merge( $items, $imported );
-	$posts = get_posts( array(
-		'post_type' => 'estudia_ehep_item', 'post_status' => 'publish', 'numberposts' => -1,
-		'orderby' => 'ID', 'order' => 'ASC', 'update_post_term_cache' => false,
-	) );
+function estudiamed_ehep_editorial_items( $module ) {
+	$posts = get_posts( array( 'post_type' => 'estudia_ehep_item', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'ID', 'order' => 'ASC' ) );
+	$items = array();
 	foreach ( $posts as $post ) {
+		$target = get_post_meta( $post->ID, '_estudia_question_module', true ) ?: 'ehep';
+		if ( $target !== $module ) continue;
 		$item = get_post_meta( $post->ID, '_estudia_ehep', true );
-		if ( empty( $item['subject'] ) || empty( $item['source'] ) || $item['key'] < 0 ||
-			count( array_filter( $item['options'] ) ) !== 4 || count( array_filter( $item['reasons'] ) ) !== 4 ||
-			'' === trim( $post->post_title ) ) {
-			continue;
-		}
+		if ( empty( $item['subject'] ) || empty( $item['source'] ) || ! isset( $item['key'], $item['options'][ $item['key'] ] ) ||
+			count( array_filter( $item['options'] ) ) !== 4 || count( array_filter( $item['reasons'] ) ) !== 4 || '' === trim( $post->post_title ) ) continue;
 		$item['id'] = 'wp-' . $post->ID;
 		$item['stem'] = $post->post_title;
 		$items[] = $item;
@@ -78,6 +97,48 @@ function estudiamed_ehep_bank() {
 	return $items;
 }
 
+function estudiamed_ehep_bank() {
+	$items = require __DIR__ . '/practice.php';
+	$imported = require dirname( __DIR__ ) . '/data/html-practice.php';
+	$bank = array_column( array_merge( $items, $imported ), null, 'id' );
+	foreach ( estudiamed_ehep_editorial_items( 'ehep' ) as $item ) {
+		$original = $item['original'] ?? '';
+		if ( isset( $bank[ $original ] ) ) {
+			$prior = $bank[ $original ];
+			if ( ! empty( $item['archived'] ) ) {
+				unset( $bank[ $original ] );
+				continue;
+			}
+			$item['id'] = $original;
+			$item['caces_source'] = $prior['caces_source'] ?? $prior['source'];
+			$item['caces_answer'] = $prior['caces_answer'] ?? $prior['options'][ $prior['key'] ];
+			$item['fixedOrder'] = true;
+			if ( isset( $prior['image'] ) ) $item['image'] = $prior['image'];
+		}
+		if ( empty( $item['archived'] ) ) $bank[ $item['id'] ] = $item;
+	}
+	return array_values( $bank );
+}
+
+add_filter( 'estudia_quiz_editorial_items', static function ( $bank ) {
+	foreach ( estudiamed_ehep_editorial_items( 'general' ) as $item ) {
+		if ( empty( $item['archived'] ) && ! empty( $item['explanation'] ) &&
+			in_array( $item['subject'], estudia_quiz_catalog( 'es' )[ $item['category'] ?? '' ] ?? array(), true ) &&
+			in_array( $item['type'] ?? '', array( 'case', 'mcq' ), true ) ) {
+			$bank[] = $item + array( 'lang' => 'es', 'origin' => 'bank' );
+		}
+	}
+	return $bank;
+} );
+
+add_action( 'update_post_meta', static function ( $meta_id, $id, $key, $new ) {
+	if ( '_estudia_ehep' !== $key || 'estudia_ehep_item' !== get_post_type( $id ) ) return;
+	$old = get_post_meta( $id, $key, true );
+	$fields = array_flip( array( 'key', 'explanation', 'reasons' ) );
+	$before = array_intersect_key( (array) $old, $fields );
+	$after = array_intersect_key( (array) $new, $fields );
+	if ( $before !== $after ) add_post_meta( $id, '_estudia_key_log', array( 'at' => gmdate( 'c' ), 'user' => get_current_user_id(), 'before' => $before, 'after' => $after ) );
+}, 10, 4 );
 
 function estudiamed_ehep_topic( $item ) {
 	if ( ! empty( $item['topic'] ) ) {
@@ -85,6 +146,7 @@ function estudiamed_ehep_topic( $item ) {
 	}
 	$topics = array(
 		'epi-01' => 'Medidas de frecuencia', 'epi-02' => 'Pruebas diagnósticas', 'epi-03' => 'Diseños de estudio',
+		'html-2' => 'Obstrucción intestinal mecánica',
 		'bio-01' => 'Fisiología endocrina', 'bio-02' => 'Fisiología renal', 'bio-03' => 'Fisiología cardiovascular',
 	);
 	return $topics[ $item['id'] ] ?? ( 0 === strpos( $item['id'], 'html-' ) ? 'Convocatoria I · 2023' : 'Sin tema asignado' );

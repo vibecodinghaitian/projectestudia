@@ -3,12 +3,19 @@ defined( 'ABSPATH' ) || exit;
 
 function estudiamed_ehep_clinical_review( $item ) {
 	if ( ! preg_match( '/^html-([0-9]+)$/D', $item['id'], $id ) ||
-		! preg_match( '/pág\. ([0-9]+)$/u', $item['source'], $page ) ) {
+		! preg_match( '/pág\. ([0-9]+)$/u', ( $item['caces_source'] ?? $item['source'] ), $page ) ) {
 		return null;
 	}
 	static $reviews = null;
 	if ( null === $reviews ) {
 		$reviews = json_decode( (string) file_get_contents( dirname( __DIR__ ) . '/data/clinical-reviews.json' ), true );
+	}
+	if ( isset( $item['caces_answer'] ) ) {
+		return array(
+			'pagina' => (int) $page[1], 'caces' => $item['caces_answer'], 'estado' => 'Corrección editorial',
+			'segunGuia' => $item['options'][ $item['key'] ] !== $item['caces_answer'] ? $item['options'][ $item['key'] ] : '',
+			'explicacion' => $item['explanation'] ?? '', 'fuente' => $item['source'],
+		);
 	}
 	return array(
 		'pagina' => (int) $page[1],
