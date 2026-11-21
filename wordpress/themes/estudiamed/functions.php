@@ -8,7 +8,7 @@ add_action( 'after_setup_theme', function () {
 } );
 
 add_action( 'wp_enqueue_scripts', function () {
-	wp_enqueue_style( 'estudiamed', get_stylesheet_uri(), array(), '1.4.0' );
+	wp_enqueue_style( 'estudiamed', get_stylesheet_uri(), array(), '1.4.1' );
 	if ( ! is_front_page() ) {
 		return;
 	}

@@ -2,11 +2,13 @@
 /**
  * Plugin Name: EstudiaMed Campus
  * Description: Acceso de estudiantes, blog y avisos del campus.
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 defined( 'ABSPATH' ) || exit;
 
+define( 'ESTUDIA_CAMPUS_FILE', __FILE__ );
 require_once __DIR__ . '/editor.php';
+require_once __DIR__ . '/welcome.php';
 require_once __DIR__ . '/gemini.php';
 
 function estudia_campus_url( $route ) {
@@ -35,6 +37,7 @@ add_action( 'template_redirect', static function () {
 		$nonce = isset( $_POST['_wpnonce'] ) && is_string( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
 		$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
 		$name = sanitize_text_field( wp_unslash( $_POST['student_name'] ?? '' ) );
+		list( $number, $consent, $invalid_number ) = estudia_welcome_form_values();
 		$password = isset( $_POST['password'] ) && is_string( $_POST['password'] ) ? wp_unslash( $_POST['password'] ) : '';
 		if ( ! wp_verify_nonce( $nonce, 'estudia_' . $route ) ) {
 			$message = 'La sesión del formulario venció. Vuelve a intentarlo.';
@@ -52,12 +55,16 @@ add_action( 'template_redirect', static function () {
 			$message = 'No se pudo iniciar sesión. Revisa el correo y la contraseña.';
 		} elseif ( '' === $name || strlen( $name ) > 150 || strlen( $password ) < 12 || strlen( $password ) > 128 ) {
 			$message = 'Introduce tu nombre y una contraseña de 12 a 128 caracteres.';
+		} elseif ( $invalid_number ) {
+			$message = 'Introduce un número de WhatsApp válido con código de país o deja el campo vacío y la casilla desmarcada.';
 		} else {
 			$account = wp_insert_user( array(
 				'user_login' => 'estudiante-' . wp_generate_password( 15, false ), 'user_email' => $email,
 				'user_pass' => $password, 'display_name' => $name, 'first_name' => $name, 'role' => 'subscriber',
 			) );
 			if ( ! is_wp_error( $account ) ) {
+				estudia_welcome_save_consent( $account, $number, $consent );
+				do_action( 'estudia_campus_account_activated', $account );
 				wp_set_current_user( $account );
 				wp_set_auth_cookie( $account, true, is_ssl() );
 				wp_safe_redirect( estudia_campus_url( 'mi-panel' ) );
@@ -105,6 +112,9 @@ function estudia_campus_account_form( $route, $message, $email, $name ) {
 			<?php if ( 'recuperar' !== $route ) : ?>
 				<label>Contraseña <input type="password" name="password" required maxlength="128" <?php if ( 'registro' === $route ) : ?>minlength="12" autocomplete="new-password"<?php else : ?>autocomplete="current-password"<?php endif; ?>></label>
 			<?php endif; ?>
+			<?php if ( 'registro' === $route ) : ?>
+				<?php estudia_welcome_fields( isset( $_POST['estudia_whatsapp'] ) && is_string( $_POST['estudia_whatsapp'] ) ? sanitize_text_field( wp_unslash( $_POST['estudia_whatsapp'] ) ) : '', '1' === ( $_POST['estudia_wa_consent'] ?? '' ) ); ?>
+			<?php endif; ?>
 			<button class="btn"><?php echo esc_html( 'recuperar' === $route ? 'Enviar enlace' : $titles[ $route ] ); ?></button>
 		</form>
 		<p><a href="<?php echo esc_url( estudia_campus_url( 'ingresar' === $route ? 'recuperar' : 'ingresar' ) ); ?>"><?php echo 'ingresar' === $route ? '¿Olvidaste tu contraseña?' : 'Iniciar sesión'; ?></a></p>
@@ -125,6 +135,7 @@ function estudia_campus_panel() {
 		echo '<a class="card" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>';
 	}
 	echo '</div>';
+	estudia_welcome_profile();
 }
 
 function estudia_campus_blog() {
