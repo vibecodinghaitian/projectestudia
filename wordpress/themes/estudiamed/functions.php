@@ -7,14 +7,14 @@ add_action( 'after_setup_theme', function () {
 } );
 
 add_action( 'wp_enqueue_scripts', function () {
-	wp_enqueue_style( 'estudiamed', get_stylesheet_uri(), array(), '1.1.0' );
+	wp_enqueue_style( 'estudiamed', get_stylesheet_uri(), array(), '1.2.0' );
 	if ( ! is_front_page() ) {
 		return;
 	}
 	$assets = get_template_directory_uri() . '/assets/';
-	wp_enqueue_script( 'estudiamed-catalog', $assets . 'catalog.js', array(), '1.1.0', true );
-	wp_enqueue_script( 'estudiamed-catalog-es', $assets . 'catalog-es.js', array( 'estudiamed-catalog' ), '1.1.0', true );
-	wp_enqueue_script( 'estudiamed-study', $assets . 'study.js', array( 'estudiamed-catalog-es' ), '1.1.0', true );
+	wp_enqueue_script( 'estudiamed-catalog', $assets . 'catalog.js', array(), '1.2.0', true );
+	wp_enqueue_script( 'estudiamed-catalog-es', $assets . 'catalog-es.js', array( 'estudiamed-catalog' ), '1.2.0', true );
+	wp_enqueue_script( 'estudiamed-study', $assets . 'study.js', array( 'estudiamed-catalog-es' ), '1.2.0', true );
 } );
 
 function estudiamed_language() {

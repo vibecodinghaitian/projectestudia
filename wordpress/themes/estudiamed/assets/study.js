@@ -32,7 +32,7 @@
     return node;
   }
 
-  for (const exam of exams) {
+  for (const exam of exams.filter(({ id }) => id !== 'revalida-br')) {
     const count = questions.filter(question => question.examId === exam.id).length;
     const card = element('article', '', 'card');
     card.append(element('span', exam.country, 'pill'), element('h3', exam.code),
