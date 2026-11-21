@@ -25,3 +25,7 @@
 .ehep [hidden] { display:none!important; }
 @media(max-width:42rem) { .ehep-grid { grid-template-columns:1fr; } }
 .ehep-question-image { display:block; max-width:100%; height:auto; margin:.75rem 0; }
+
+.ehep-tutor{width:min(660px,calc(100% - 24px));max-height:86vh;overflow:auto;border:1px solid #dce5ea;border-radius:.8rem;padding:1.25rem;color:#172837}
+.ehep-tutor::backdrop{background:#17283799}.ehep-tutor textarea{display:block;width:100%;padding:.5rem;margin:.3rem 0 .7rem;font:inherit}
+.ehep-transcript{margin-top:.75rem}.ehep-transcript p{white-space:pre-wrap}

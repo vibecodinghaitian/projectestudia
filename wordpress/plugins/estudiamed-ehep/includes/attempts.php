@@ -34,6 +34,7 @@ function estudiamed_ehep_routes() {
 		array( '/ehep/attempts', 'POST', 'estudiamed_ehep_start' ),
 		array( '/ehep/attempts/(?P<id>[0-9]+)', 'GET', 'estudiamed_ehep_show' ),
 		array( '/ehep/attempts/(?P<id>[0-9]+)/answer', 'POST', 'estudiamed_ehep_answer' ),
+		array( '/ehep/attempts/(?P<id>[0-9]+)/tutor', 'POST', 'estudiamed_ehep_tutor' ),
 		array( '/ehep/attempts/(?P<id>[0-9]+)/finish', 'POST', 'estudiamed_ehep_finish' ),
 	) as $route ) {
 		register_rest_route( $namespace, $route[0], array( 'methods' => $route[1], 'callback' => $route[2], 'permission_callback' => $auth ) );
@@ -145,6 +146,8 @@ function estudiamed_ehep_snapshot( $row ) {
 		}
 		if ( ! $row['finished'] && ( 'mock' === $row['mode'] || null === $item['selected'] ) ) {
 			unset( $item['key'], $item['reasons'] );
+		} else {
+			$item['clinical'] = estudiamed_ehep_clinical_review( $item );
 		}
 		$items[] = $item;
 	}

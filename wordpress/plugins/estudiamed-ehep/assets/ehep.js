@@ -140,7 +140,64 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
     parent.append(image);
   }
 
-  function review(item) {
+  function openTutor(index, item) {
+    const dialog = element('dialog', '', 'ehep-tutor');
+    const title = element('h3', 'Preguntar a Gemini');
+    dialog.setAttribute('aria-label', title.textContent);
+    const close = button('Cerrar', () => dialog.close());
+    dialog.append(title, close);
+    root.append(dialog);
+    dialog.addEventListener('close', () => dialog.remove(), { once: true });
+    dialog.showModal();
+
+    if (root.dataset.ehepGemini !== '1') {
+      dialog.append(element('p', 'El chat requiere una clave de Gemini configurada en el servidor. La corrección guardada está disponible.'));
+      return;
+    }
+    const attemptId = attempt.id;
+    const form = element('form');
+    const label = element('label', 'Tu pregunta');
+    const input = element('textarea');
+    input.rows = 3;
+    input.maxLength = 800;
+    input.required = true;
+    label.append(input);
+    const suggestions = element('div', '', 'ehep-actions');
+    for (const text of ['Explícamelo paso a paso', '¿Por qué mi respuesta es incorrecta?', 'Compara las opciones']) {
+      suggestions.append(button(text, () => { input.value = text; input.focus(); }));
+    }
+    const submit = element('button', 'Enviar pregunta');
+    submit.type = 'submit';
+    const transcript = element('div', '', 'ehep-transcript');
+    transcript.setAttribute('aria-live', 'polite');
+    if (item.image) {
+      dialog.append(element('p', 'La imagen incluida se enviará a Gemini.'));
+    } else if (/imagen|figura|radiografía|gráfica/i.test(item.stem)) {
+      dialog.append(element('p', 'Gemini no recibirá una imagen para este ítem.'));
+    }
+    form.append(label, submit);
+    dialog.append(suggestions, form, transcript);
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const question = input.value.trim();
+      if (!question || submit.disabled) return;
+      submit.disabled = true;
+      transcript.append(element('strong', question));
+      const reply = element('p', 'Consultando a Gemini…');
+      transcript.append(reply);
+      try {
+        const result = await api('/attempts/' + attemptId + '/tutor', { item: index, question });
+        reply.textContent = (item.image && !result.imageSent ? 'Gemini no recibió la imagen.\n\n' : '') + result.answer;
+        input.value = '';
+      } catch (error) {
+        reply.textContent = error.message;
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+
+  function review(item, index) {
     const body = element('div', '', 'ehep-feedback');
     body.append(element('p', item.selected === null ? 'Sin respuesta' :
       item.selected === item.key ? 'Respuesta correcta' : 'Respuesta incorrecta'));
@@ -152,7 +209,26 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
       list.append(element('li', label + option + (reason ? ' — ' + reason : '')));
     });
     body.append(list);
-    if (!item.reasons) body.append(element('p', 'El banco original incluye la respuesta, sin explicación.'));
+    const clinical = item.clinical;
+    if (clinical) {
+      body.append(element('p', 'Respuesta del banco CACES · Página ' + clinical.pagina + ' · ' + clinical.caces));
+      if (clinical.segunGuia) {
+        body.append(element('p', 'Respuesta según la guía · ' + clinical.segunGuia));
+      }
+      body.append(element('p', 'Estado de revisión · ' + clinical.estado));
+      body.append(element('p', clinical.explicacion || 'La clave coincide con el PDF de 2023. La explicación clínica está pendiente de verificar.'));
+      if (clinical.distractor) body.append(element('p', 'Distractor principal · ' + clinical.distractor));
+      if (clinical.url && clinical.url.startsWith('https://')) {
+        const reference = element('a', clinical.fuente);
+        reference.href = clinical.url;
+        reference.target = '_blank';
+        reference.rel = 'noopener noreferrer';
+        const paragraph = element('p');
+        paragraph.append(reference);
+        body.append(paragraph);
+      }
+    }
+    body.append(button('Preguntar a Gemini', () => openTutor(index, item)));
     body.append(element('p', item.source));
     return body;
   }
@@ -173,7 +249,7 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
         detail.append(element('summary', 'Pregunta ' + (index + 1) + ' · ' + item.subject),
           element('p', item.stem));
         appendImage(detail, item);
-        detail.append(review(item));
+        detail.append(review(item, index));
         session.append(detail);
       });
       heading.focus();
@@ -230,7 +306,7 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
       });
     });
     session.append(answers);
-    if (checkedPractice) session.append(review(item));
+    if (checkedPractice) session.append(review(item, position));
     const actions = element('div', '', 'ehep-actions');
     if (position > 0) actions.append(button('Anterior', () => { if (!busy) { position--; renderAttempt(); } }));
     if (position < attempt.items.length - 1) actions.append(button('Siguiente', () => { if (!busy) { position++; renderAttempt(); } }));
