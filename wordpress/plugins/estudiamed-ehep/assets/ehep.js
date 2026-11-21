@@ -131,6 +131,15 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
     renderAttempt();
   }
 
+  function appendImage(parent, item) {
+    if (!item.image) return;
+    const image = element('img', '', 'ehep-question-image');
+    image.src = item.image;
+    image.alt = 'Imagen de referencia de la pregunta';
+    image.loading = 'lazy';
+    parent.append(image);
+  }
+
   function review(item) {
     const body = element('div', '', 'ehep-feedback');
     body.append(element('p', item.selected === null ? 'Sin respuesta' :
@@ -138,9 +147,13 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
     const list = element('ol');
     list.type = 'A';
     item.options.forEach((option, index) => {
-      list.append(element('li', (index === item.key ? 'Correcta · ' : '') + option + ' — ' + item.reasons[index]));
+      const label = index === item.key ? 'Correcta · ' : index === item.selected ? 'Tu respuesta · ' : '';
+      const reason = item.reasons?.[index];
+      list.append(element('li', label + option + (reason ? ' — ' + reason : '')));
     });
-    body.append(list, element('p', item.source));
+    body.append(list);
+    if (!item.reasons) body.append(element('p', 'El banco original incluye la respuesta, sin explicación.'));
+    body.append(element('p', item.source));
     return body;
   }
 
@@ -158,7 +171,9 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
       attempt.items.forEach((item, index) => {
         const detail = element('details');
         detail.append(element('summary', 'Pregunta ' + (index + 1) + ' · ' + item.subject),
-          element('p', item.stem), review(item));
+          element('p', item.stem));
+        appendImage(detail, item);
+        detail.append(review(item));
         session.append(detail);
       });
       heading.focus();
@@ -184,6 +199,7 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
     const answers = element('form');
     const options = element('fieldset');
     options.append(element('legend', item.stem));
+    appendImage(options, item);
     item.options.forEach((option, index) => {
       const label = element('label', '', 'ehep-option');
       const radio = element('input');

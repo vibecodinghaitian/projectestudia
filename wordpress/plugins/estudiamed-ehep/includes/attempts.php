@@ -101,6 +101,18 @@ function estudiamed_ehep_start( $request ) {
 	}
 	shuffle( $items );
 	$items = array_slice( $items, 0, $count );
+	foreach ( $items as &$item ) {
+		if ( isset( $item['fixedOrder'] ) && ! $item['fixedOrder'] ) {
+			$order = array_keys( $item['options'] );
+			shuffle( $order );
+			$item['options'] = array_map( static function ( $index ) use ( $item ) {
+				return $item['options'][ $index ];
+			}, $order );
+			$item['key'] = array_search( $item['key'], $order, true );
+		}
+		unset( $item['fixedOrder'] );
+	}
+	unset( $item );
 	$ok = $wpdb->insert( estudiamed_ehep_table(), array(
 		'user_id' => get_current_user_id(), 'mode' => $mode, 'deadline' => 'mock' === $mode ? time() + $minutes * 60 : 0,
 		'items' => wp_json_encode( $items ), 'answers' => '[]', 'summary' => '{}',
@@ -128,6 +140,9 @@ function estudiamed_ehep_snapshot( $row ) {
 	$items = array();
 	foreach ( $row['items'] as $i => $item ) {
 		$item['selected'] = $row['answers'][ $i ] ?? null;
+		if ( isset( $item['image'] ) ) {
+			$item['image'] = plugins_url( 'assets/question-images/' . $item['image'], ESTUDIAMED_EHEP_FILE );
+		}
 		if ( ! $row['finished'] && ( 'mock' === $row['mode'] || null === $item['selected'] ) ) {
 			unset( $item['key'], $item['reasons'] );
 		}

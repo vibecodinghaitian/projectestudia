@@ -56,6 +56,8 @@ add_action( 'save_post_estudia_ehep_item', 'estudiamed_ehep_save_item' );
 
 function estudiamed_ehep_bank() {
 	$items = require __DIR__ . '/practice.php';
+	$imported = require dirname( __DIR__ ) . '/data/html-practice.php';
+	$items = array_merge( $items, $imported );
 	$posts = get_posts( array(
 		'post_type' => 'estudia_ehep_item', 'post_status' => 'publish', 'numberposts' => -1,
 		'orderby' => 'ID', 'order' => 'ASC', 'update_post_term_cache' => false,

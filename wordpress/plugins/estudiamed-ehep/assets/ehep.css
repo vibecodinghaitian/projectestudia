@@ -24,3 +24,4 @@
 .ehep summary { cursor:pointer; font-weight:650; }
 .ehep [hidden] { display:none!important; }
 @media(max-width:42rem) { .ehep-grid { grid-template-columns:1fr; } }
+.ehep-question-image { display:block; max-width:100%; height:auto; margin:.75rem 0; }
