@@ -13,6 +13,9 @@
     <a class="brand" href="<?php echo esc_url( estudiamed_home() ); ?>"><span class="mark" aria-hidden="true">+</span>EstudiaMed</a>
     <nav aria-label="<?php echo esc_html( estudiamed_translate( 'Menu principal', 'Menú principal' ) ); ?>">
       <a href="<?php echo esc_url( estudiamed_home( '#exames' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Exames', 'Exámenes' ) ); ?></a>
+      <?php if ( shortcode_exists( 'estudiamed_quiz' ) ) : ?>
+        <a href="<?php echo esc_url( estudiamed_home( '#quiz-general' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Quiz Geral', 'Quiz General' ) ); ?></a>
+      <?php endif; ?>
       <a href="<?php echo esc_url( estudiamed_home( '#praticar' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Praticar', 'Practicar' ) ); ?></a>
       <a href="<?php echo esc_url( estudiamed_home( '#progresso' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Progresso', 'Progreso' ) ); ?></a>
     </nav>

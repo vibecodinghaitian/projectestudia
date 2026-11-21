@@ -38,6 +38,12 @@
     </details>
   </section>
 </div>
+<?php if ( shortcode_exists( 'estudiamed_quiz' ) ) : ?>
+<section id="quiz-general" class="section wrap">
+  <h2><?php echo esc_html( estudiamed_translate( 'Quiz Geral', 'Quiz General' ) ); ?></h2>
+  <?php echo do_shortcode( '[estudiamed_quiz]' ); ?>
+</section>
+<?php endif; ?>
 <section id="praticar" class="section section-alt">
   <div class="wrap">
     <header><h2><?php echo esc_html( estudiamed_translate( 'Prática Revalida', 'Práctica Revalida' ) ); ?></h2><p><?php echo esc_html( estudiamed_translate( 'Selecione uma especialidade para treinar ou faça um simulado cronometrado com todas as questões do catálogo.', 'Selecciona una especialidad para practicar o realiza un simulacro cronometrado con todas las preguntas del catálogo.' ) ); ?></p></header>
