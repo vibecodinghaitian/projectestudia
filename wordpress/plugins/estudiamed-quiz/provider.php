@@ -1,7 +1,7 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-function estudia_quiz_generate( $lang, $category, $subject, $type, $count ) {
+function estudia_quiz_generate( $lang, $category, $subject, $type, $count, $topic = '' ) {
 	$settings = get_option( 'estudia_quiz_ai', array() );
 	$provider = $settings['provider'] ?? '';
 	$key = $settings['key'] ?? '';
@@ -26,7 +26,7 @@ function estudia_quiz_generate( $lang, $category, $subject, $type, $count ) {
 	}
 	$kind = 'case' === $type ? 'clinical vignettes' : 'multiple-choice questions';
 	$language = 'pt' === $lang ? 'Brazilian Portuguese' : 'Spanish';
-	$prompt = "Write $count original educational medical $kind in $language for $category / $subject. These are unreviewed practice drafts. Do not copy official test questions or invent source citations. Each item must have one defensible correct choice. Return only a JSON object with an items array. Each item has: stem (string), options (four distinct strings), key (zero-based integer), explanation (string explaining the correct choice and why the distractors are incorrect).";
+	$prompt = "Write $count original educational medical $kind in $language for $category / $subject / $topic. These are unreviewed practice drafts. Do not copy official test questions or invent source citations. Each item must have one defensible correct choice. Return only a JSON object with an items array. Each item has: stem (string), options (four distinct strings), key (zero-based integer), explanation (string explaining the correct choice and why the distractors are incorrect).";
 	$headers = array( 'Content-Type' => 'application/json' );
 	if ( 'gemini' === $provider ) {
 		$url = 'https://generativelanguage.googleapis.com/v1beta/models/' . rawurlencode( $model ) . ':generateContent';

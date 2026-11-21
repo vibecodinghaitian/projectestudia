@@ -12,6 +12,11 @@
   <div class="wrap top">
     <a class="brand" href="<?php echo esc_url( estudiamed_home() ); ?>"><span class="mark" aria-hidden="true">+</span>EstudiaMed</a>
     <nav aria-label="<?php echo esc_html( estudiamed_translate( 'Menu principal', 'Menú principal' ) ); ?>">
+      <a href="<?php echo esc_url( estudiamed_home( '#temas' ) ); ?>">Temas</a>
+      <?php $ehep_menu_url = function_exists( 'estudiamed_ehep_url' ) ? estudiamed_ehep_url() : ''; ?>
+      <?php if ( $ehep_menu_url ) : ?>
+        <a href="<?php echo esc_url( $ehep_menu_url ); ?>"<?php if ( is_page( 'ehep-ecuador' ) ) : ?> aria-current="page"<?php endif; ?>>Examen de Ecuador (EHEP)</a>
+      <?php endif; ?>
       <a href="<?php echo esc_url( estudiamed_home( '#exames' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Exames', 'Exámenes' ) ); ?></a>
       <?php if ( shortcode_exists( 'estudiamed_quiz' ) ) : ?>
         <a href="<?php echo esc_url( estudiamed_home( '#quiz-general' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Quiz Geral', 'Quiz General' ) ); ?></a>
@@ -20,10 +25,6 @@
       <a href="<?php echo esc_url( estudiamed_home( '#progresso' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Progresso', 'Progreso' ) ); ?></a>
     </nav>
     <div class="header-tools">
-      <nav class="languages" aria-label="<?php echo esc_attr( 'Idioma' ); ?>">
-        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" lang="pt-BR" <?php if ( 'pt-BR' === estudiamed_language() ) { echo 'aria-current="true"'; } ?>>Português</a>
-        <a href="<?php echo esc_url( add_query_arg( 'idioma', 'es', home_url( '/' ) ) ); ?>" lang="es" <?php if ( 'es' === estudiamed_language() ) { echo 'aria-current="true"'; } ?>>Español</a>
-      </nav>
     <?php if ( is_user_logged_in() ) : ?>
       <a class="account" href="<?php echo esc_url( wp_logout_url( estudiamed_home() ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Sair', 'Salir' ) ); ?></a>
     <?php else : ?>

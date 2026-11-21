@@ -101,6 +101,7 @@ add_action( 'admin_post_estudia_quiz_import', static function () {
 			estudia_quiz_admin_finish( false );
 		}
 		$item += array( 'lang' => $lang, 'type' => $type, 'category' => $category, 'subject' => $subject,
+			'topic' => sanitize_text_field( $raw['topic'] ?? '' ) ?: 'Sin tema asignado',
 			'source' => sanitize_text_field( $source ), 'origin' => 'bank' );
 		$bank[ hash( 'sha256', wp_json_encode( array( $lang, $type, $category, $subject, $item['stem'] ) ) ) ] = $item;
 	}

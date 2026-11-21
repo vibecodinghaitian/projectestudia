@@ -221,3 +221,23 @@
   showAvailability();
   showMetrics();
 })();
+
+const topicQuery = document.getElementById('topic-query');
+if (topicQuery) {
+  const groups = document.querySelectorAll('.topic-subject');
+  const normalize = text => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  topicQuery.addEventListener('input', () => {
+    const query = normalize(topicQuery.value.trim());
+    let shown = 0;
+    for (const group of groups) {
+      const subject = normalize(group.querySelector('h3').textContent);
+      const topics = [...group.querySelectorAll('.topic-item')];
+      for (const item of topics) {
+        item.hidden = !subject.includes(query) && !normalize(item.textContent).includes(query);
+      }
+      group.hidden = topics.every(item => item.hidden);
+      if (!group.hidden) shown++;
+    }
+    document.getElementById('topic-empty').hidden = shown > 0;
+  });
+}

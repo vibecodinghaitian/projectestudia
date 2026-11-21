@@ -12,23 +12,26 @@ function estudiamed_ehep_dashboard() {
 		return '<section lang="es"><h2>EHEP Ecuador · Medicina</h2><p>Inicia sesión para practicar y guardar tu progreso.</p><p><a href="' .
 			esc_url( $login ) . '">Iniciar sesión</a> · <a href="https://www.caces.gob.ec/examen-de-habilitacion-para-el-ejercicio-profesional/">Información oficial de CACES</a></p></section>';
 	}
-	wp_enqueue_style( 'estudiamed-ehep', plugins_url( 'assets/ehep.css', ESTUDIAMED_EHEP_FILE ), array(), '1.2.0' );
-	wp_enqueue_script( 'estudiamed-ehep', plugins_url( 'assets/ehep.js', ESTUDIAMED_EHEP_FILE ), array(), '1.2.0', true );
+	wp_enqueue_style( 'estudiamed-ehep', plugins_url( 'assets/ehep.css', ESTUDIAMED_EHEP_FILE ), array(), '1.3.0' );
+	wp_enqueue_script( 'estudiamed-ehep', plugins_url( 'assets/ehep.js', ESTUDIAMED_EHEP_FILE ), array(), '1.3.0', true );
 	ob_start();
 	?>
-	<section class="ehep" lang="es" data-ehep-gemini="<?php echo estudiamed_ehep_gemini_key() ? '1' : '0'; ?>" data-ehep-url="<?php echo esc_url( rest_url( 'estudiamed/v1/ehep' ) ); ?>" data-ehep-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>">
+	<section class="ehep" lang="es" data-ehep-editor="<?php echo current_user_can( 'edit_pages' ) ? '1' : '0'; ?>" data-ehep-gemini="<?php echo estudiamed_ehep_gemini_key() ? '1' : '0'; ?>" data-ehep-url="<?php echo esc_url( rest_url( 'estudiamed/v1/ehep' ) ); ?>" data-ehep-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>">
 		<header class="ehep-hero">
 			<p>EstudiaMed · Medicina</p>
-			<h2>EHEP Ecuador</h2>
+			<h2>Examen de Ecuador (EHEP)</h2>
 			<p>Practica por especialidad y revisa tu desempeño antes del Examen de Habilitación para el Ejercicio Profesional.</p>
 		</header>
 		<p>Consulta el reglamento, las convocatorias y los requisitos vigentes en <a href="https://www.caces.gob.ec/examen-de-habilitacion-para-el-ejercicio-profesional/">Información oficial de CACES</a>. Las preguntas y los simulacros de esta página son ejercicios educativos de EstudiaMed.</p>
 		<p class="ehep-status" role="status"></p>
 		<div class="ehep-dashboard" hidden>
+			<p class="ehep-storage">Tus intentos, progreso y favoritos se guardan en tu cuenta.</p>
 			<section class="ehep-card">
 				<h3>Banco de preguntas y simulacros</h3>
 				<form class="ehep-form">
 					<label>Especialidad <select name="subject"><option value="">Todas las especialidades</option></select></label>
+					<label>Tema <select name="topic"><option value="">Todos los temas</option></select></label>
+					<label class="ehep-check"><input type="checkbox" name="favorites"> Solo favoritas</label>
 					<label>Preguntas <input type="number" name="count" min="1" max="50" value="3" required></label>
 					<label>Minutos del simulacro <input type="number" name="minutes" min="1" max="120" value="10" required></label>
 					<div class="ehep-actions">

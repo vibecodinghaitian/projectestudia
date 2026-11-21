@@ -38,6 +38,7 @@
     </details>
   </section>
 </div>
+<?php get_template_part( 'topics' ); ?>
 <?php if ( shortcode_exists( 'estudiamed_quiz' ) ) : ?>
 <section id="quiz-general" class="section wrap">
   <h2><?php echo esc_html( estudiamed_translate( 'Quiz Geral', 'Quiz General' ) ); ?></h2>

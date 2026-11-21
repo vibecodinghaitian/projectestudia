@@ -34,6 +34,7 @@ function estudiamed_ehep_routes() {
 		array( '/ehep/attempts', 'POST', 'estudiamed_ehep_start' ),
 		array( '/ehep/attempts/(?P<id>[0-9]+)', 'GET', 'estudiamed_ehep_show' ),
 		array( '/ehep/attempts/(?P<id>[0-9]+)/answer', 'POST', 'estudiamed_ehep_answer' ),
+		array( '/ehep/attempts/(?P<id>[0-9]+)/favorite', 'POST', 'estudiamed_ehep_favorite' ),
 		array( '/ehep/attempts/(?P<id>[0-9]+)/tutor', 'POST', 'estudiamed_ehep_tutor' ),
 		array( '/ehep/attempts/(?P<id>[0-9]+)/finish', 'POST', 'estudiamed_ehep_finish' ),
 	) as $route ) {
@@ -52,8 +53,17 @@ function estudiamed_ehep_dashboard_data( $request ) {
 	$user = get_current_user_id();
 	$page = max( 1, min( 100000, (int) $request['page'] ) );
 	$subjects = array();
+	$topics = array();
+	$favorites = estudiamed_ehep_favorites();
+	$favorite_topics = array();
 	foreach ( estudiamed_ehep_bank() as $item ) {
-		$subjects[ $item['subject'] ] = ( $subjects[ $item['subject'] ] ?? 0 ) + 1;
+		$area = $item['subject'];
+		$topic = estudiamed_ehep_topic( $item );
+		$subjects[ $area ] = ( $subjects[ $area ] ?? 0 ) + 1;
+		$topics[ $area ][ $topic ] = ( $topics[ $area ][ $topic ] ?? 0 ) + 1;
+		if ( isset( $favorites[ $item['id'] ] ) ) {
+			$favorite_topics[ $area ][ $topic ] = ( $favorite_topics[ $area ][ $topic ] ?? 0 ) + 1;
+		}
 	}
 	ksort( $subjects );
 	$active = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table WHERE user_id = %d AND finished = 0 ORDER BY id DESC LIMIT 1", $user ) );
@@ -80,7 +90,7 @@ function estudiamed_ehep_dashboard_data( $request ) {
 			break;
 		}
 	}
-	return array( 'subjects' => (object) $subjects, 'stats' => $stats, 'history' => $history, 'page' => $page, 'active' => (int) $active );
+	return array( 'subjects' => (object) $subjects, 'topics' => (object) $topics, 'favoriteTopics' => (object) $favorite_topics, 'stats' => $stats, 'history' => $history, 'page' => $page, 'active' => (int) $active );
 }
 
 function estudiamed_ehep_start( $request ) {
@@ -89,13 +99,18 @@ function estudiamed_ehep_start( $request ) {
 	$subject = $request['subject'];
 	$count = $request['count'];
 	$minutes = $request['minutes'];
-	if ( ! in_array( $mode, array( 'practice', 'mock' ), true ) || ! is_string( $subject ) ||
+	$topic = $request['topic'] ?? '';
+	$only_favorites = $request['favorites'] ?? false;
+	if ( ! in_array( $mode, array( 'practice', 'mock' ), true ) || ! is_string( $subject ) || ! is_string( $topic ) || ! is_bool( $only_favorites ) ||
 		! is_int( $count ) || $count < 1 || $count > 50 ||
 		( 'mock' === $mode && ( ! is_int( $minutes ) || $minutes < 1 || $minutes > 120 ) ) ) {
 		return estudiamed_ehep_error( 'ehep_config', 'Revisa la configuración del ejercicio.', 400 );
 	}
-	$items = array_values( array_filter( estudiamed_ehep_bank(), static function ( $item ) use ( $subject ) {
-		return '' === $subject || $item['subject'] === $subject;
+	$favorites = $only_favorites ? estudiamed_ehep_favorites() : array();
+	$items = array_values( array_filter( estudiamed_ehep_bank(), static function ( $item ) use ( $subject, $topic, $only_favorites, $favorites ) {
+		return ( '' === $subject || $item['subject'] === $subject ) &&
+			( '' === $topic || estudiamed_ehep_topic( $item ) === $topic ) &&
+			( ! $only_favorites || isset( $favorites[ $item['id'] ] ) );
 	} ) );
 	if ( count( $items ) < $count ) {
 		return estudiamed_ehep_error( 'ehep_count', 'No hay suficientes preguntas en esta selección.', 400 );
@@ -139,8 +154,15 @@ function estudiamed_ehep_load( $id ) {
 
 function estudiamed_ehep_snapshot( $row ) {
 	$items = array();
+	$favorites = estudiamed_ehep_favorites();
+	$omitted = 0;
 	foreach ( $row['items'] as $i => $item ) {
 		$item['selected'] = $row['answers'][ $i ] ?? null;
+		$item['favorite'] = isset( $favorites[ $item['id'] ] );
+		$item['topic'] = estudiamed_ehep_topic( $item );
+		if ( null === $item['selected'] ) {
+			++$omitted;
+		}
 		if ( isset( $item['image'] ) ) {
 			$item['image'] = plugins_url( 'assets/question-images/' . $item['image'], ESTUDIAMED_EHEP_FILE );
 		}
@@ -150,6 +172,10 @@ function estudiamed_ehep_snapshot( $row ) {
 			$item['clinical'] = estudiamed_ehep_clinical_review( $item );
 		}
 		$items[] = $item;
+	}
+	if ( $row['finished'] ) {
+		$row['summary']['omitted'] = $omitted;
+		$row['summary']['incorrect'] = count( $items ) - $row['summary']['correct'] - $omitted;
 	}
 	return array(
 		'id' => (int) $row['id'], 'mode' => $row['mode'], 'deadline' => (int) $row['deadline'],

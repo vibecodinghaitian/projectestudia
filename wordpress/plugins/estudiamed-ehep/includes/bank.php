@@ -23,6 +23,7 @@ function estudiamed_ehep_editor( $post ) {
 	$item = get_post_meta( $post->ID, '_estudia_ehep', true );
 	wp_nonce_field( 'estudia_ehep_edit', 'estudia_ehep_nonce' );
 	echo '<p><label for="ehep_subject">Especialidad</label><br><input class="regular-text" id="ehep_subject" name="ehep_subject" value="' . esc_attr( $item['subject'] ?? '' ) . '"></p>';
+	echo '<p><label for="ehep_topic">Tema</label><br><input class="regular-text" id="ehep_topic" name="ehep_topic" value="' . esc_attr( $item['topic'] ?? '' ) . '"></p>';
 	echo '<p><label for="ehep_source">Fuente o procedencia</label><br><input class="regular-text" id="ehep_source" name="ehep_source" value="' . esc_attr( $item['source'] ?? '' ) . '"></p>';
 	echo '<p>Usa contenido educativo propio o autorizado. Selecciona la respuesta correcta y explica las cuatro alternativas.</p>';
 	foreach ( range( 0, 3 ) as $i ) {
@@ -41,6 +42,7 @@ function estudiamed_ehep_save_item( $id ) {
 	}
 	$item = array(
 		'subject' => sanitize_text_field( wp_unslash( $_POST['ehep_subject'] ?? '' ) ),
+		'topic' => sanitize_text_field( wp_unslash( $_POST['ehep_topic'] ?? '' ) ),
 		'source' => sanitize_text_field( wp_unslash( $_POST['ehep_source'] ?? '' ) ),
 		'key' => in_array( $_POST['ehep_key'] ?? '', array( '0', '1', '2', '3' ), true ) ? (int) $_POST['ehep_key'] : -1,
 		'options' => array(),
@@ -74,4 +76,43 @@ function estudiamed_ehep_bank() {
 		$items[] = $item;
 	}
 	return $items;
+}
+
+
+function estudiamed_ehep_topic( $item ) {
+	if ( ! empty( $item['topic'] ) ) {
+		return $item['topic'];
+	}
+	$topics = array(
+		'epi-01' => 'Medidas de frecuencia', 'epi-02' => 'Pruebas diagnósticas', 'epi-03' => 'Diseños de estudio',
+		'bio-01' => 'Fisiología endocrina', 'bio-02' => 'Fisiología renal', 'bio-03' => 'Fisiología cardiovascular',
+	);
+	return $topics[ $item['id'] ] ?? ( 0 === strpos( $item['id'], 'html-' ) ? 'Convocatoria I · 2023' : 'Sin tema asignado' );
+}
+
+function estudiamed_ehep_favorites() {
+	return array_fill_keys( get_user_meta( get_current_user_id(), '_estudia_ehep_favorite', false ), true );
+}
+
+function estudiamed_ehep_favorite( $request ) {
+	$row = estudiamed_ehep_load( (int) $request['id'] );
+	if ( is_wp_error( $row ) ) {
+		return $row;
+	}
+	$index = $request['item'];
+	$value = $request['favorite'];
+	if ( ! is_int( $index ) || ! is_bool( $value ) || ! isset( $row['items'][ $index ] ) ) {
+		return estudiamed_ehep_error( 'ehep_favorite_input', 'No se pudo identificar la pregunta.', 400 );
+	}
+	$id = $row['items'][ $index ]['id'];
+	$user = get_current_user_id();
+	$exists = isset( estudiamed_ehep_favorites()[ $id ] );
+	if ( $value && ! $exists ) {
+		add_user_meta( $user, '_estudia_ehep_favorite', $id );
+	} elseif ( ! $value && $exists ) {
+		delete_user_meta( $user, '_estudia_ehep_favorite', $id );
+	}
+	$saved = isset( estudiamed_ehep_favorites()[ $id ] );
+	return $saved === $value ? array( 'favorite' => $saved ) :
+		estudiamed_ehep_error( 'ehep_favorite_store', 'No se pudo guardar el favorito.', 500 );
 }

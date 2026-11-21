@@ -1,0 +1,304 @@
+[
+  {
+    "subject": "Anatomía",
+    "topics": [
+      {
+        "name": "Anatomía del Tórax",
+        "summary": "Estudio de las estructuras óseas, musculares, vasculares, nerviosas y orgánicas que conforman la cavidad torácica, delimitada por la caja torácica.",
+        "concepts": [
+          "Caja Torácica: Compuesta por el esternón, 12 pares de costillas y 12 vértebras torácicas. Protege los órganos vitales.",
+          "Mediastino: Espacio central que contiene el corazón, grandes vasos (aorta, venas cavas), tráquea, esófago y timo.",
+          "Pulmones y Pleura: Los pulmones ocupan las cavidades pleurales laterales. Cada pulmón está envuelto por una pleura visceral y parietal.",
+          "Corazón: Situado en el mediastino medio, con 4 cámaras (2 aurículas, 2 ventrículos).",
+          "Diafragma: Principal músculo de la respiración que separa el tórax del abdomen."
+        ]
+      },
+      {
+        "name": "Anatomía y Fisiología Pulmonar",
+        "summary": "Estudio de la estructura de los pulmones y las vías respiratorias y su función en el intercambio gaseoso y la mecánica de la respiración.",
+        "concepts": [
+          "Estructura Pulmonar: El pulmón derecho tiene 3 lóbulos y el izquierdo 2. El árbol bronquial se divide en una zona de conducción y una zona respiratoria donde se encuentran los alvéolos.",
+          "Mecánica Respiratoria: La inspiración es un proceso activo que involucra la contracción del diafragma y los músculos intercostales. La espiración es principalmente un proceso pasivo debido al retroceso elástico de los pulmones.",
+          "Volúmenes Pulmonares: Incluyen el volumen corriente (aire en una respiración normal, ~500ml), volumen de reserva inspiratoria (~3000ml), volumen de reserva espiratoria (~1100ml) y volumen residual (~1200ml).",
+          "Capacidades Pulmonares: Son la suma de dos o más volúmenes, como la Capacidad Vital (suma de volúmenes de reserva y corriente, ~4600ml) y la Capacidad Pulmonar Total (~5800ml).",
+          "Intercambio Gaseoso: Ocurre en los alvéolos, donde el oxígeno pasa del aire a la sangre y el dióxido de carbono pasa de la sangre al aire para ser exhalado."
+        ]
+      }
+    ]
+  },
+  {
+    "subject": "Neumología",
+    "topics": [
+      {
+        "name": "Neumonía Adquirida en la Comunidad (NAC)",
+        "summary": "La neumonía adquirida en la comunidad (NAC) es una infección aguda del parénquima pulmonar que se desarrolla en individuos de la población general, fuera de un entorno hospitalario.",
+        "concepts": []
+      },
+      {
+        "name": "COVID-19",
+        "summary": "Enfermedad infecciosa causada por el coronavirus SARS-CoV-2. Se originó en Wuhan, China, en 2019, y se convirtió en una pandemia global que afecta principalmente al sistema respiratorio.",
+        "concepts": []
+      },
+      {
+        "name": "Influenza (Gripe)",
+        "summary": "Enfermedad respiratoria aguda y contagiosa causada por los virus de la influenza tipo A, B y C, que afecta la nariz, garganta y pulmones.",
+        "concepts": []
+      },
+      {
+        "name": "Bronquitis Aguda",
+        "summary": "Inflamación aguda del árbol traqueobronquial, caracterizada por tos (con o sin producción de esputo) que dura más de cinco días, generalmente en ausencia de neumonía.",
+        "concepts": []
+      },
+      {
+        "name": "Absceso Pulmonar",
+        "summary": "Necrosis del parénquima pulmonar causada por una infección, que conduce a la formación de una cavidad mayor de 2 cm que contiene material purulento.",
+        "concepts": []
+      },
+      {
+        "name": "Asma",
+        "summary": "Enfermedad heterogénea, generalmente caracterizada por una inflamación crónica de las vías respiratorias. Se define por la historia de síntomas respiratorios como sibilancias, disnea, opresión en el pecho y tos, que varían con el tiempo y en intensidad, junto con una limitación variable del flujo de aire espiratorio.",
+        "concepts": []
+      },
+      {
+        "name": "Enfermedad Pulmonar Obstructiva Crónica (EPOC)",
+        "summary": "Enfermedad común, prevenible y tratable, caracterizada por síntomas respiratorios persistentes y limitación del flujo aéreo, debido a anomalías de las vías respiratorias y/o alveolares, generalmente causadas por una exposición significativa a partículas o gases nocivos.",
+        "concepts": []
+      },
+      {
+        "name": "Derrame Pleural",
+        "summary": "Acumulación anormal de líquido en el espacio pleural, el espacio entre la pleura visceral (que recubre el pulmón) y la pleura parietal (que recubre la pared torácica).",
+        "concepts": []
+      },
+      {
+        "name": "Tuberculosis Pulmonar",
+        "summary": "Enfermedad infecciosa y contagiosa causada por Mycobacterium tuberculosis (bacilo de Koch). Afecta principalmente a los pulmones, pero puede diseminarse a otros órganos.",
+        "concepts": []
+      },
+      {
+        "name": "Cáncer de Pulmón",
+        "summary": "Tumor maligno que se origina en las células que recubren las vías respiratorias (bronquios) o en el parénquima pulmonar. Es una de las neoplasias más comunes y letales del mundo.",
+        "concepts": []
+      }
+    ]
+  },
+  {
+    "subject": "Medicina Interna",
+    "topics": [
+      {
+        "name": "Hipertensión Arterial Esencial",
+        "summary": "La hipertensión arterial (HTA) se define como una presión arterial sistólica (PAS) sostenida ≥ 140 mmHg o una presión arterial diastólica (PAD) sostenida ≥ 90 mmHg. La HTA esencial o primaria constituye el 90-95% de los casos y no tiene una causa identificable.",
+        "concepts": []
+      },
+      {
+        "name": "Diabetes Mellitus Tipo 1",
+        "summary": "Enfermedad crónica autoinmune caracterizada por la destrucción de las células beta del páncreas, lo que conduce a una deficiencia absoluta de insulina y a una hiperglucemia dependiente de la administración exógena de insulina para sobrevivir.",
+        "concepts": []
+      },
+      {
+        "name": "Diabetes Mellitus Tipo 2",
+        "summary": "Enfermedad metabólica crónica caracterizada por niveles elevados de glucosa en sangre (hiperglucemia), resultado de una combinación de resistencia a la acción de la insulina en los tejidos periféricos y una deficiencia relativa en la secreción de insulina por las células beta del páncreas.",
+        "concepts": []
+      },
+      {
+        "name": "Insuficiencia Cardíaca Congestiva",
+        "summary": "Síndrome clínico complejo resultante de cualquier alteración estructural o funcional del llenado o eyección ventricular. La característica fundamental es la incapacidad del corazón para bombear sangre a un ritmo adecuado para satisfacer las demandas metabólicas del cuerpo, o hacerlo solo a expensas de presiones de llenado elevadas.",
+        "concepts": []
+      },
+      {
+        "name": "Infarto Agudo de Miocardio (IAM)",
+        "summary": "El infarto agudo de miocardio es una emergencia médica caracterizada por la muerte (necrosis) de una porción del músculo cardíaco debido a la interrupción del suministro de sangre a esa área, generalmente causada por la obstrucción de una arteria coronaria.",
+        "concepts": []
+      },
+      {
+        "name": "Enfermedad Pulmonar Obstructiva Crónica (EPOC)",
+        "summary": "Es una enfermedad pulmonar común, prevenible y tratable, caracterizada por síntomas respiratorios persistentes y limitación del flujo aéreo due a anomalías de las vías respiratorias y/o alveolares, generalmente causadas por una exposición significativa a partículas o gases nocivos.",
+        "concepts": []
+      },
+      {
+        "name": "Fibrilación Auricular (FA)",
+        "summary": "Es la arritmia cardíaca sostenida más frecuente. Se caracteriza por una activación auricular caótica, desorganizada y rápida, que resulta en una pérdida de la contracción auricular efectiva y una respuesta ventricular irregularmente irregular.",
+        "concepts": []
+      },
+      {
+        "name": "Neumonía Adquirida en la Comunidad (NAC)",
+        "summary": "Infección aguda del parénquima pulmonar en un paciente que no ha sido hospitalizado ni ha residido en un centro de cuidados a largo plazo en los 14 días previos al inicio de los síntomas.",
+        "concepts": []
+      },
+      {
+        "name": "Trombosis Venosa Profunda (TVP)",
+        "summary": "Formación de un coágulo de sangre (trombo) en una vena profunda, más comúnmente en las piernas. Es una condición potencialmente grave debido a su principal complicación: la embolia pulmonar (EP).",
+        "concepts": []
+      },
+      {
+        "name": "Embolia Pulmonar (EP)",
+        "summary": "Obstrucción de la arteria pulmonar o una de sus ramas por un émbolo, que en más del 90% de los casos proviene de un trombo originado en el sistema venoso profundo de las extremidades inferiores (TVP).",
+        "concepts": []
+      },
+      {
+        "name": "Cirrosis Hepática",
+        "summary": "La cirrosis es la etapa final de la enfermedad hepática crónica, caracterizada por la distorsión de la arquitectura hepática normal debido a la formación de fibrosis extensa y nódulos de regeneración. Esto conduce a una insuficiencia hepatocelular e hipertensión portal.",
+        "concepts": []
+      },
+      {
+        "name": "Enfermedad Renal Crónica (ERC)",
+        "summary": "Se define como la presencia de anomalías en la estructura o función del riñón durante más de 3 meses, con implicaciones para la salud. Se diagnostica por una Tasa de Filtración Glomerular (TFG) < 60 ml/min/1.73m² o la presencia de marcadores de daño renal (como albuminuria).",
+        "concepts": []
+      },
+      {
+        "name": "Artritis Reumatoide (AR)",
+        "summary": "Enfermedad inflamatoria crónica, sistémica y autoinmune, que afecta principalmente a la membrana sinovial de las articulaciones diartrodiales, llevando a la destrucción del cartílago y el hueso, y a deformidades articulares.",
+        "concepts": []
+      }
+    ]
+  },
+  {
+    "subject": "Cirugía",
+    "topics": [
+      {
+        "name": "Apendicitis Aguda",
+        "summary": "La apendicitis aguda es la inflamación del apéndice vermiforme, un pequeño saco en forma de dedo que se proyecta desde el ciego. Es la emergencia quirúrgica abdominal más común.",
+        "concepts": []
+      },
+      {
+        "name": "Colecistitis Aguda",
+        "summary": "Es la inflamación aguda de la vesícula biliar. En más del 90% de los casos (colecistitis litiásica), es causada por la obstrucción del conducto cístico por un cálculo biliar.",
+        "concepts": []
+      },
+      {
+        "name": "Hernia Inguinal",
+        "summary": "Es la protrusión de contenido intraabdominal (como intestino o grasa) a través de un punto débil en la pared abdominal en la región inguinal. Es una de las patologías quirúrgicas más comunes.",
+        "concepts": []
+      },
+      {
+        "name": "Trauma Craneoencefálico (TCE)",
+        "summary": "Lesión física o alteración funcional del contenido craneal causada por una fuerza mecánica externa. El espectro va desde una conmoción cerebral leve hasta lesiones cerebrales graves y potencialmente mortales.",
+        "concepts": []
+      },
+      {
+        "name": "Obstrucción Intestinal Mecánica",
+        "summary": "Es la detención del tránsito del contenido intestinal debido a un bloqueo físico en la luz del intestino. Se diferencia del íleo paralítico, donde la causa es funcional y no mecánica.",
+        "concepts": []
+      },
+      {
+        "name": "Peritonitis Aguda",
+        "summary": "Es la inflamación del peritoneo, la membrana serosa que recubre la cavidad abdominal y los órganos intraabdominales. Generalmente es causada por una infección bacteriana.",
+        "concepts": []
+      },
+      {
+        "name": "Diverticulitis Aguda",
+        "summary": "Es la inflamación e infección de uno o más divertículos, que son pequeñas bolsas o sacos que se forman en la pared del colon, principalmente en el sigmoides.",
+        "concepts": []
+      },
+      {
+        "name": "Fractura de Cadera",
+        "summary": "Solución de continuidad ósea en el extremo proximal del fémur. Se clasifican principalmente en intracapsulares (subcapitales, transcervicales), que afectan al cuello femoral, y extracapsulares (intertrocantéreas, subtrocantéreas).",
+        "concepts": []
+      },
+      {
+        "name": "Coledocolitiasis",
+        "summary": "Presencia de uno o más cálculos biliares en el conducto biliar común (colédoco).",
+        "concepts": []
+      },
+      {
+        "name": "Úlcera Perforada",
+        "summary": "Complicación aguda y grave de la úlcera péptica en la que la lesión erosiona a través de todo el espesor de la pared gástrica o duodenal, permitiendo la fuga de contenido gastrointestinal a la cavidad peritoneal.",
+        "concepts": []
+      }
+    ]
+  },
+  {
+    "subject": "Pediatría",
+    "topics": [
+      {
+        "name": "Asma Infantil",
+        "summary": "Enfermedad inflamatoria crónica de las vías respiratorias caracterizada por una hiperreactividad bronquial y una obstrucción variable del flujo aéreo, a menudo reversible de forma espontánea o con tratamiento. Es la enfermedad crónica más frecuente en la infancia.",
+        "concepts": []
+      },
+      {
+        "name": "Bronquiolitis Aguda",
+        "summary": "Infección viral aguda de las vías respiratorias inferiores que afecta principalmente a los bronquiolos. Es la causa más común de hospitalización en lactantes menores de 1 año.",
+        "concepts": []
+      },
+      {
+        "name": "Sarampión",
+        "summary": "Enfermedad infecciosa exantemática aguda, muy contagiosa, causada por el virus del sarampión, un Morbillivirus de la familia Paramyxoviridae.",
+        "concepts": []
+      },
+      {
+        "name": "Neumonía Infantil",
+        "summary": "Infección aguda del parénquima pulmonar que afecta a la población pediátrica. Es una de las principales causas de morbilidad y mortalidad en niños menores de 5 años en todo el mundo.",
+        "concepts": []
+      },
+      {
+        "name": "Laringotraqueobronquitis (Crup)",
+        "summary": "Infección viral aguda que causa inflamación y edema en la laringe, tráquea y bronquios, llevando a una obstrucción de la vía aérea superior. Es la causa más frecuente de estridor en niños.",
+        "concepts": []
+      }
+    ]
+  },
+  {
+    "subject": "Ginecología y Obstetricia",
+    "topics": [
+      {
+        "name": "Endometriosis",
+        "summary": "Es una enfermedad crónica, benigna y dependiente de estrógenos, definida por la presencia de tejido endometrial (glándulas y estroma) fuera de la cavidad uterina. Estos implantes ectópicos responden a las hormonas del ciclo menstrual, causando inflamación crónica, dolor y formación de adherencias.",
+        "concepts": []
+      },
+      {
+        "name": "Miomas Uterinos (Leiomiomas)",
+        "summary": "Son los tumores benignos más frecuentes del útero y de todo el tracto genital femenino. Se originan en las células del músculo liso del miometrio.",
+        "concepts": []
+      },
+      {
+        "name": "Preeclampsia",
+        "summary": "Trastorno multisistémico específico del embarazo, definido por la aparición de hipertensión arterial (PA ≥ 140/90 mmHg) después de las 20 semanas de gestación en una mujer previamente normotensa, acompañada de proteinuria (≥ 300 mg/24h) o, en ausencia de proteinuria, de signos de daño en órganos diana (trombocitopenia, insuficiencia renal, disfunción hepática, síntomas cerebrales o visuales).",
+        "concepts": []
+      },
+      {
+        "name": "Embarazo Ectópico",
+        "summary": "Es la implantación del blastocisto fuera de la cavidad endometrial del útero. Es una emergencia ginecológica potencialmente mortal.",
+        "concepts": []
+      },
+      {
+        "name": "Placenta Previa",
+        "summary": "Es la implantación de la placenta en el segmento uterino inferior, de modo que cubre parcial o totalmente el orificio cervical interno (OCI). Se clasifica como completa, parcial, marginal o de inserción baja.",
+        "concepts": []
+      }
+    ]
+  },
+  {
+    "subject": "Psiquiatría y Neurología",
+    "topics": [
+      {
+        "name": "Trastorno de Ansiedad Generalizada (TAG)",
+        "summary": "Se caracteriza por una ansiedad y preocupación excesivas, persistentes y difíciles de controlar sobre múltiples eventos o actividades (como el trabajo, la salud o las finanzas), que se prolongan durante al menos 6 meses.",
+        "concepts": []
+      },
+      {
+        "name": "Enfermedad de Parkinson",
+        "summary": "Es un trastorno neurodegenerativo progresivo que afecta principalmente a las neuronas dopaminérgicas en una zona específica del cerebro llamada sustancia negra. Esto conduce a una deficiencia de dopamina y a los característicos trastornos del movimiento.",
+        "concepts": []
+      },
+      {
+        "name": "Trastorno de Pánico",
+        "summary": "Se caracteriza por la aparición de ataques de pánico recurrentes e inesperados. Un ataque de pánico es un episodio brusco de miedo o malestar intenso que alcanza su máxima expresión en minutos y se acompaña de síntomas físicos y cognitivos. El trastorno implica además una preocupación persistente por tener más ataques o por sus consecuencias, y/o un cambio de comportamiento significativo para evitarlos (conductas de evitación).",
+        "concepts": []
+      },
+      {
+        "name": "Depresión Mayor",
+        "summary": "El Trastorno Depresivo Mayor (TDM) es un trastorno del estado de ánimo caracterizado por un período de al menos dos semanas durante el cual hay un estado de ánimo deprimido o una pérdida de interés o placer (anhedonia) en casi todas las actividades, acompañado de otros síntomas somáticos y cognitivos.",
+        "concepts": []
+      },
+      {
+        "name": "Epilepsia",
+        "summary": "Trastorno neurológico crónico caracterizado por una predisposición duradera a generar crisis epilépticas y por las consecuencias neurobiológicas, cognitivas, psicológicas y sociales de esta condición. Se define por la ocurrencia de al menos dos crisis no provocadas con más de 24 horas de separación.",
+        "concepts": []
+      },
+      {
+        "name": "Accidente Cerebrovascular Hemorrágico",
+        "summary": "Es un tipo de accidente cerebrovascular (ACV) causado por la ruptura de un vaso sanguíneo en el cerebro, lo que provoca un sangrado. Se divide principalmente en hemorragia intraparenquimatosa (dentro del tejido cerebral) y hemorragia subaracnoidea (en el espacio que rodea al cerebro).",
+        "concepts": []
+      }
+    ]
+  }
+]

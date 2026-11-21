@@ -70,15 +70,37 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
     subject.replaceChildren(new Option('Todas las especialidades', ''));
     for (const [name, total] of Object.entries(data.subjects)) subject.add(new Option(name + ' (' + total + ')', name));
     if (Object.hasOwn(data.subjects, previous)) subject.value = previous;
+    const topic = form.elements.topic;
+    const favorites = form.elements.favorites;
+    function topicsForSelection() {
+      const available = favorites.checked ? data.favoriteTopics : data.topics;
+      if (subject.value) return available[subject.value] || {};
+      const combined = new Map();
+      for (const topics of Object.values(available)) {
+        for (const [name, total] of Object.entries(topics)) combined.set(name, (combined.get(name) || 0) + total);
+      }
+      return Object.fromEntries(combined);
+    }
     function showCount() {
-      const count = subject.value ? data.subjects[subject.value] : Object.values(data.subjects).reduce((a, b) => a + b, 0);
+      const available = topicsForSelection();
+      const count = topic.value ? available[topic.value] || 0 : Object.values(available).reduce((a, b) => a + b, 0);
       form.elements.count.max = Math.max(1, Math.min(50, count));
       form.elements.count.value = Math.min(Number(form.elements.count.value) || 1, Number(form.elements.count.max));
       select('.ehep-count').textContent = count + (count === 1 ? ' pregunta educativa disponible.' : ' preguntas educativas disponibles.');
       for (const control of form.querySelectorAll('button')) control.disabled = count === 0;
     }
-    subject.onchange = showCount;
-    showCount();
+    function refreshTopics() {
+      const previousTopic = topic.value;
+      const choices = Object.entries(topicsForSelection());
+      topic.replaceChildren(new Option('Todos los temas', ''));
+      for (const [name, total] of choices) topic.add(new Option(name + ' (' + total + ')', name));
+      if (choices.some(([name]) => name === previousTopic)) topic.value = previousTopic;
+      topic.disabled = choices.length === 0;
+      showCount();
+    }
+    subject.onchange = favorites.onchange = refreshTopics;
+    topic.onchange = showCount;
+    refreshTopics();
     const { stats } = data;
     select('.ehep-stats').replaceChildren(element('p', stats.attempts + ' intentos completados'),
       element('p', stats.total + ' preguntas en intentos completados'),
@@ -92,7 +114,7 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
       revision.append(element('p', name + ' · ' + record.correct + '/' + record.total + ' aciertos'));
       if (available) revision.append(button('Repasar ' + name, () => {
         subject.value = name;
-        showCount();
+        refreshTopics();
         subject.focus();
       }));
     }
@@ -166,6 +188,12 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
     for (const text of ['Explícamelo paso a paso', '¿Por qué mi respuesta es incorrecta?', 'Compara las opciones']) {
       suggestions.append(button(text, () => { input.value = text; input.focus(); }));
     }
+    if (root.dataset.ehepEditor === '1') {
+      suggestions.append(button('Preparar borrador editorial', () => {
+        input.value = 'Redacta un borrador para revisión humana: explica la opción del banco y cada distractor. Indica los datos faltantes, posibles discrepancias y fuentes que deben verificarse antes de publicar.';
+        input.focus();
+      }));
+    }
     const submit = element('button', 'Enviar pregunta');
     submit.type = 'submit';
     const transcript = element('div', '', 'ehep-transcript');
@@ -233,6 +261,28 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
     return body;
   }
 
+  function favoriteControl(item, index) {
+    const id = attempt.id;
+    const control = button('', async () => {
+      control.disabled = true;
+      try {
+        const result = await api('/attempts/' + id + '/favorite', { item: index, favorite: !item.favorite });
+        item.favorite = result.favorite;
+        paint();
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        control.disabled = false;
+      }
+    });
+    function paint() {
+      control.textContent = item.favorite ? 'Quitar de favoritas' : 'Guardar como favorita';
+      control.setAttribute('aria-pressed', String(item.favorite));
+    }
+    paint();
+    return control;
+  }
+
   function renderAttempt() {
     clearInterval(secondsTimer);
     dashboard.hidden = true;
@@ -244,12 +294,20 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
     if (attempt.finished) {
       session.append(element('p', attempt.summary.correct + ' de ' + attempt.summary.total + ' aciertos · ' +
         percent(attempt.summary.correct, attempt.summary.total)));
+      const outcomes = element('dl', '', 'ehep-outcomes');
+      for (const [label, value] of [['Correctas', attempt.summary.correct], ['Incorrectas', attempt.summary.incorrect], ['Omitidas', attempt.summary.omitted]]) {
+        const metric = element('div');
+        metric.append(element('dt', label), element('dd', String(value)));
+        outcomes.append(metric);
+      }
+      session.append(outcomes);
       attempt.items.forEach((item, index) => {
         const detail = element('details');
-        detail.append(element('summary', 'Pregunta ' + (index + 1) + ' · ' + item.subject),
+        const outcome = item.selected === null ? 'Omitida' : item.selected === item.key ? 'Correcta' : 'Incorrecta';
+        detail.append(element('summary', 'Pregunta ' + (index + 1) + ' · ' + outcome + ' · ' + item.subject),
           element('p', item.stem));
         appendImage(detail, item);
-        detail.append(review(item, index));
+        detail.append(favoriteControl(item, index), review(item, index));
         session.append(detail);
       });
       heading.focus();
@@ -271,7 +329,7 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
       tick();
     }
     const item = attempt.items[position];
-    session.append(element('p', item.subject + ' · Pregunta ' + (position + 1) + ' de ' + attempt.items.length));
+    session.append(element('p', item.subject + ' · ' + item.topic + ' · Pregunta ' + (position + 1) + ' de ' + attempt.items.length));
     const answers = element('form');
     const options = element('fieldset');
     options.append(element('legend', item.stem));
@@ -305,7 +363,7 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
         renderAttempt();
       });
     });
-    session.append(answers);
+    session.append(answers, favoriteControl(item, position));
     if (checkedPractice) session.append(review(item, position));
     const actions = element('div', '', 'ehep-actions');
     if (position > 0) actions.append(button('Anterior', () => { if (!busy) { position--; renderAttempt(); } }));
@@ -321,6 +379,7 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
       const values = new FormData(form);
       setAttempt(await api('/attempts', {
         mode: event.submitter?.value || 'practice', subject: values.get('subject'),
+        topic: values.get('topic') || '', favorites: form.elements.favorites.checked,
         count: Number(values.get('count')), minutes: Number(values.get('minutes'))
       }));
       position = 0;
