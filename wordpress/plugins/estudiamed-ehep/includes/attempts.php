@@ -69,6 +69,7 @@ function estudiamed_ehep_dashboard_data( $request ) {
 	$active = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table WHERE user_id = %d AND finished = 0 ORDER BY id DESC LIMIT 1", $user ) );
 	$stats = array( 'attempts' => 0, 'total' => 0, 'correct' => 0, 'subjects' => array() );
 	$history = array();
+	$topic_results = array();
 	$offset = ( $page - 1 ) * 10;
 	for ( $cursor = PHP_INT_MAX; ; ) {
 		$recent = $wpdb->get_results( $wpdb->prepare( "SELECT id,mode,finished,summary FROM $table WHERE user_id = %d AND finished > 0 AND id < %d ORDER BY id DESC LIMIT 200", $user, $cursor ), ARRAY_A );
@@ -85,12 +86,16 @@ function estudiamed_ehep_dashboard_data( $request ) {
 				$stats['subjects'][ $name ]['total'] = ( $stats['subjects'][ $name ]['total'] ?? 0 ) + $subject['total'];
 				$stats['subjects'][ $name ]['correct'] = ( $stats['subjects'][ $name ]['correct'] ?? 0 ) + $subject['correct'];
 			}
+			foreach ( $summary['topics'] ?? array() as $name => $record ) {
+				$topic_results[ $name ] = ( $topic_results[ $name ] ?? 0 ) + $record;
+			}
 		}
 		if ( count( $recent ) < 200 ) {
 			break;
 		}
 	}
 	$learning = array();
+	$topic_learning = array();
 	if ( function_exists( 'estudia_academy_recommendation' ) ) {
 		$weak = array_filter( $stats['subjects'], static function ( $subject ) {
 			return $subject['total'] >= 3 && $subject['correct'] < $subject['total'];
@@ -104,8 +109,15 @@ function estudiamed_ehep_dashboard_data( $request ) {
 				$learning[ $name ] = $resource;
 			}
 		}
+		arsort( $topic_results );
+		foreach ( array_slice( array_keys( array_filter( $topic_results ) ), 0, 3 ) as $name ) {
+			$resource = estudia_academy_recommendation( $name );
+			if ( $resource ) {
+				$topic_learning[ $name ] = $resource;
+			}
+		}
 	}
-	return array( 'subjects' => (object) $subjects, 'topics' => (object) $topics, 'favoriteTopics' => (object) $favorite_topics, 'stats' => $stats, 'learning' => (object) $learning, 'history' => $history, 'page' => $page, 'active' => (int) $active );
+	return array( 'subjects' => (object) $subjects, 'topics' => (object) $topics, 'favoriteTopics' => (object) $favorite_topics, 'stats' => $stats, 'learning' => (object) $learning, 'topicLearning' => (object) $topic_learning, 'history' => $history, 'page' => $page, 'active' => (int) $active );
 }
 
 function estudiamed_ehep_start( $request ) {
@@ -199,11 +211,17 @@ function estudiamed_ehep_snapshot( $row ) {
 }
 
 function estudiamed_ehep_grade( $row ) {
-	$summary = array( 'correct' => 0, 'total' => count( $row['items'] ), 'subjects' => array() );
+	$summary = array( 'correct' => 0, 'total' => count( $row['items'] ), 'subjects' => array(), 'topics' => array() );
 	foreach ( $row['items'] as $i => $item ) {
 		$subject = $item['subject'];
 		$correct = ( $row['answers'][ $i ] ?? -1 ) === $item['key'] ? 1 : 0;
 		$summary['correct'] += $correct;
+		if ( ! $correct && isset( $row['answers'][ $i ] ) ) {
+			$topic = estudiamed_ehep_topic( $item );
+			if ( ! in_array( $topic, array( 'Convocatoria I · 2023', 'Sin tema asignado' ), true ) ) {
+				$summary['topics'][ $topic ] = ( $summary['topics'][ $topic ] ?? 0 ) + 1;
+			}
+		}
 		$summary['subjects'][ $subject ]['correct'] = ( $summary['subjects'][ $subject ]['correct'] ?? 0 ) + $correct;
 		$summary['subjects'][ $subject ]['total'] = ( $summary['subjects'][ $subject ]['total'] ?? 0 ) + 1;
 	}

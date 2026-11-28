@@ -2,7 +2,7 @@
 /**
  * Plugin Name: EstudiaMed EHEP Ecuador
  * Description: Banco educativo, simulacros y seguimiento para el módulo EHEP.
- * Version: 1.5.0
+ * Version: 1.5.1
  * Requires PHP: 7.4
  */
 defined( 'ABSPATH' ) || exit;

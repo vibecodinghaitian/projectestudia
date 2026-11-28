@@ -2,7 +2,7 @@
 /**
  * Plugin Name: EstudiaMed Campus
  * Description: Acceso de estudiantes, blog y avisos del campus.
- * Version: 1.2.0
+ * Version: 1.2.1
  */
 defined( 'ABSPATH' ) || exit;
 

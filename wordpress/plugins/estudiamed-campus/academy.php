@@ -131,6 +131,7 @@ function estudia_academy_recommendation( $subject ) {
 	}
 	$readings = array(
 		'anatomia' => array( 'Anatomía del tórax', 'anatomia-anatomia-del-torax' ),
+		'obstruccion-intestinal-mecanica' => array( 'Obstrucción intestinal mecánica', 'cirugia-obstruccion-intestinal-mecanica' ),
 		'cirugia' => array( 'Obstrucción intestinal mecánica', 'cirugia-obstruccion-intestinal-mecanica' ),
 		'cirugia-general' => array( 'Obstrucción intestinal mecánica', 'cirugia-obstruccion-intestinal-mecanica' ),
 	);

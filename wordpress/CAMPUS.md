@@ -48,6 +48,6 @@ La prueba local interceptó `wp_mail()` y las peticiones a Kapso. Validó tres r
 
 ## Academy y Revalida
 
-En **Cursos médicos**, crea un curso y sus lecciones. Vincula cada lección al curso en el recuadro **Curso de la lección**. Asigna un área con el mismo nombre que la especialidad de EHEP. El panel EHEP ofrece una lección pública si el área tiene al menos tres preguntas evaluadas y algún error. Incluye dos fichas de la biblioteca como punto de partida en Anatomía y Cirugía. El estudiante marca las lecciones completadas desde su cuenta y las encuentra en **Mi panel**.
+En **Cursos médicos**, crea un curso y sus lecciones. Vincula cada lección al curso en el recuadro **Curso de la lección**. Asigna un área con el mismo nombre que la especialidad o el tema de EHEP. Las respuestas incorrectas a preguntas con tema específico también pueden sugerir una lectura. El panel EHEP ofrece una lección pública si el área tiene al menos tres preguntas evaluadas y algún error. Incluye dos fichas de la biblioteca como punto de partida en Anatomía y Cirugía. El estudiante marca las lecciones completadas desde su cuenta y las encuentra en **Mi panel**.
 
 Revalida conserva los resúmenes del navegador bajo la misma clave de almacenamiento. Permite elegir español o portugués para los enunciados, las opciones y las explicaciones. La interfaz permanece en español. Su catálogo incluye preguntas de muestra.

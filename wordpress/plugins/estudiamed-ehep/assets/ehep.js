@@ -112,7 +112,17 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
     const ranked = Object.entries(stats.subjects)
       .filter(([, record]) => record.total >= 3 && record.correct < record.total)
       .sort(([, a], [, b]) => a.correct / a.total - b.correct / b.total);
-    if (!ranked.length) revision.append(element('p', 'Practica más preguntas para identificar áreas de repaso.'));
+    const topicResources = Object.entries(data.topicLearning ?? {});
+    if (!ranked.length && !topicResources.length) {
+      revision.append(element('p', 'Practica más preguntas para identificar áreas de repaso.'));
+    }
+    for (const [name, resource] of topicResources) {
+      const lesson = element('a', resource.label);
+      lesson.href = resource.url;
+      const row = element('p', 'Recurso para repasar ' + name + ': ');
+      row.append(lesson);
+      revision.append(row);
+    }
     for (const [name, record] of ranked.slice(0, 3)) {
       const available = Object.hasOwn(data.subjects, name);
       revision.append(element('p', name + ' · ' + record.correct + '/' + record.total + ' aciertos'));

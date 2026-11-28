@@ -12,8 +12,8 @@ function estudiamed_ehep_dashboard() {
 		return '<section lang="es"><h2>EHEP Ecuador · Medicina</h2><p>Inicia sesión para practicar y guardar tu progreso.</p><p><a href="' .
 			esc_url( $login ) . '">Iniciar sesión</a> · <a href="https://www.caces.gob.ec/examen-de-habilitacion-para-el-ejercicio-profesional/">Información oficial de CACES</a></p></section>';
 	}
-	wp_enqueue_style( 'estudiamed-ehep', plugins_url( 'assets/ehep.css', ESTUDIAMED_EHEP_FILE ), array(), '1.5.0' );
-	wp_enqueue_script( 'estudiamed-ehep', plugins_url( 'assets/ehep.js', ESTUDIAMED_EHEP_FILE ), array(), '1.5.0', true );
+	wp_enqueue_style( 'estudiamed-ehep', plugins_url( 'assets/ehep.css', ESTUDIAMED_EHEP_FILE ), array(), '1.5.1' );
+	wp_enqueue_script( 'estudiamed-ehep', plugins_url( 'assets/ehep.js', ESTUDIAMED_EHEP_FILE ), array(), '1.5.1', true );
 	ob_start();
 	?>
 	<section class="ehep" lang="es" data-ehep-editor="<?php echo current_user_can( 'edit_pages' ) ? '1' : '0'; ?>" data-ehep-gemini="<?php echo estudiamed_ehep_gemini_key() ? '1' : '0'; ?>" data-ehep-url="<?php echo esc_url( rest_url( 'estudiamed/v1/ehep' ) ); ?>" data-ehep-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>">
