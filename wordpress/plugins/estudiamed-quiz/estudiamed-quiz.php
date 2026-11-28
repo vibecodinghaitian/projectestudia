@@ -2,7 +2,7 @@
 /**
  * Plugin Name: EstudiaMed Quiz General
  * Description: Práctica y simulacros bilingües con banco editorial.
- * Version: 1.2.0
+ * Version: 1.3.0
  */
 defined( 'ABSPATH' ) || exit;
 
