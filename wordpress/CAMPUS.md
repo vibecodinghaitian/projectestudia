@@ -45,3 +45,9 @@ Para confirmaciones, registra un webhook de eventos de Kapso asociado al número
 El historial refleja la cola, aceptación, entrega confirmada y fallos. Para evitar duplicados, un resultado incierto requiere comprobar el registro del proveedor antes de realizar otro envío. Los fallos confirmados admiten reintento. El trabajador vuelve a comprobar el consentimiento de WhatsApp y que el número sea el del envío original.
 
 La prueba local interceptó `wp_mail()` y las peticiones a Kapso. Validó tres registros, la ausencia de mensajes sin consentimiento, el rechazo del proveedor, la repetición del evento, un webhook firmado y el bloqueo de reintentos tras retirar el consentimiento. Los envíos con credenciales reales y la recepción en un buzón o teléfono de producción siguen pendientes.
+
+## Academy y Revalida
+
+En **Cursos médicos**, crea un curso y sus lecciones. Vincula cada lección al curso en el recuadro **Curso de la lección**. Asigna un área con el mismo nombre que la especialidad de EHEP. El panel EHEP ofrece una lección pública si el área tiene al menos tres preguntas evaluadas y algún error. Incluye dos fichas de la biblioteca como punto de partida en Anatomía y Cirugía. El estudiante marca las lecciones completadas desde su cuenta y las encuentra en **Mi panel**.
+
+Revalida conserva los resúmenes del navegador bajo la misma clave de almacenamiento. Permite elegir español o portugués para los enunciados, las opciones y las explicaciones. La interfaz permanece en español. Su catálogo incluye preguntas de muestra.

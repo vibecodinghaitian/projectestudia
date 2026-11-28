@@ -2,11 +2,13 @@
   'use strict';
   const spanish = document.documentElement.lang === 'es';
   const t = (portuguese, spanishText) => spanish ? spanishText : portuguese;
-  const { exams, questions } = spanish ? window.estudiaCatalogEs : window.estudiaCatalog;
+  const { exams, questions: defaultQuestions } = spanish ? window.estudiaCatalogEs : window.estudiaCatalog;
+  let questions = defaultQuestions;
   const find = id => document.getElementById(id);
   const catalog = find('catalogo');
   const specialty = find('especialidade');
   const setup = find('configurar');
+  const language = find('revalida-language');
   const availability = find('disponibilidade');
   const sessionPanel = find('sessao');
   const metrics = find('metricas');
@@ -48,9 +50,21 @@
     catalog.append(card);
   }
 
-  for (const name of new Set(questions.map(question => question.specialtyName))) {
-    specialty.add(new Option(name, name));
+  function setLanguage() {
+    questions = language.value === 'pt-BR' ? window.estudiaCatalog.questions : window.estudiaCatalogEs.questions;
+    specialty.options.length = 1;
+    for (const name of new Set(questions.map(question => question.specialtyName))) {
+      specialty.add(new Option(name, name));
+    }
+    showAvailability();
   }
+  try {
+    if (localStorage.getItem('estudiamed-revalida-language') === 'pt-BR') language.value = 'pt-BR';
+  } catch {}
+  language.addEventListener('change', () => {
+    try { localStorage.setItem('estudiamed-revalida-language', language.value); } catch {}
+    setLanguage();
+  });
 
   function selectedQuestions() {
     return questions.filter(question => !specialty.value || question.specialtyName === specialty.value);
@@ -86,6 +100,7 @@
     const question = session.questions[session.answers.length];
     const form = element('form');
     const title = element('h3', question.statement, 'question-title');
+    title.lang = language.value;
     const progress = element('strong',
       question.specialtyName + t(' · Questão ', ' · Pregunta ') + (session.answers.length + 1) + ' de ' + session.questions.length);
     const top = element('div', '', 'question-head');
@@ -105,11 +120,26 @@
       input.name = 'resposta';
       input.value = option.id;
       input.required = true;
-      label.append(input, element('span', option.id + '. ' + option.text));
+      const optionText = element('span', option.id + '. ' + option.text);
+      optionText.lang = language.value;
+      label.append(input, optionText);
       fieldset.append(label);
     }
     const submit = element('button', session.timed ? t('Confirmar resposta', 'Confirmar respuesta') : t('Ver correção', 'Ver corrección'), 'btn');
     form.append(fieldset, submit);
+    if (session.timed) {
+      const skip = element('button', 'Omitir pregunta', 'btn btn-outline');
+      skip.type = 'button';
+      skip.addEventListener('click', () => {
+        if (Date.now() >= session.deadline) {
+          finish(true);
+          return;
+        }
+        session.answers.push(null);
+        advance();
+      });
+      form.append(skip);
+    }
     sessionPanel.replaceChildren(top, title, form);
     if (session.timed) updateTimer();
     focusPanel(title);
@@ -142,8 +172,9 @@
     const box = element('div', '', 'feedback');
     const label = answer === question.correctAnswer ? t('Resposta correta', 'Respuesta correcta') :
       answer ? t('Resposta incorreta', 'Respuesta incorrecta') : t('Sem resposta', 'Sin respuesta');
-    box.append(element('strong', label + t(' · Gabarito ', ' · Opción correcta ') + question.correctAnswer),
-      element('p', question.explanation));
+    const rationale = element('p', question.explanation);
+    rationale.lang = language.value;
+    box.append(element('strong', label + t(' · Gabarito ', ' · Opción correcta ') + question.correctAnswer), rationale);
     return box;
   }
 
@@ -176,14 +207,23 @@
     }
     showMetrics();
     const title = element('h3', expired ? t('Tempo esgotado', 'Tiempo agotado') : t('Sessão concluída', 'Sesión completada'));
-    const summary = element('p', correct + ' de ' + attempted.length + t(' questões corretas.', ' preguntas correctas.'));
+    const answered = answers.filter(answer => answer !== null).length;
+    const incorrect = answered - correct;
+    const omitted = attempted.length - answered;
+    const summary = element('p', [
+      correct + ' de ' + attempted.length + ' correctas',
+      incorrect + (incorrect === 1 ? ' incorrecta' : ' incorrectas'),
+      omitted + (omitted === 1 ? ' omitida' : ' omitidas')
+    ].join(', ') + '.');
     const review = element('details', '', 'result');
     const list = element('ol');
     for (const [index, question] of attempted.entries()) {
       const item = element('li');
       const selected = question.options.find(option => option.id === answers[index]);
       const expected = question.options.find(option => option.id === question.correctAnswer);
-      item.append(element('p', question.statement));
+      const stem = element('p', question.statement);
+      stem.lang = language.value;
+      item.append(stem);
       if (selected) item.append(element('p', t('Sua resposta · ', 'Tu respuesta · ') + selected.id + '. ' + selected.text));
       item.append(element('p', t('Resposta esperada · ', 'Respuesta esperada · ') + expected.id + '. ' + expected.text),
         explanation(question, answers[index]));
@@ -208,7 +248,13 @@
   setup.addEventListener('submit', event => {
     event.preventDefault();
     const timed = event.submitter?.value === 'simulado';
-    const bank = timed ? questions : selectedQuestions();
+    const bank = [...(timed ? questions : selectedQuestions())];
+    if (timed) {
+      for (let index = bank.length - 1; index > 0; index--) {
+        const other = Math.floor(Math.random() * (index + 1));
+        [bank[index], bank[other]] = [bank[other], bank[index]];
+      }
+    }
     if (!bank.length) return;
     session = { timed, questions: bank, answers: [], deadline: Date.now() + bank.length * 120000 };
     setup.hidden = true;
@@ -218,7 +264,7 @@
     if (timed) timer = setInterval(updateTimer, 1000);
   });
 
-  showAvailability();
+  setLanguage();
   showMetrics();
 })();
 

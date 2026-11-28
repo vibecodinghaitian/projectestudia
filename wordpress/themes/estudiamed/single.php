@@ -2,7 +2,11 @@
 <main id="conteudo" class="wrap section">
 <?php while ( have_posts() ) : the_post(); ?>
 	<article class="panel campus-article">
-		<?php if ( function_exists( 'estudia_campus_url' ) ) : ?><a href="<?php echo esc_url( estudia_campus_url( 'blog' ) ); ?>">Volver al blog</a><?php endif; ?>
+		<?php if ( is_singular( array( 'estudia_curso', 'estudia_leccion' ) ) ) : ?>
+			<a href="<?php echo esc_url( home_url( '/#cursos' ) ); ?>">Volver a Academy</a>
+		<?php elseif ( function_exists( 'estudia_campus_url' ) ) : ?>
+			<a href="<?php echo esc_url( estudia_campus_url( 'blog' ) ); ?>">Volver al blog</a>
+		<?php endif; ?>
 		<h1><?php the_title(); ?></h1>
 		<p><?php the_author(); ?> · <time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time></p>
 		<?php the_post_thumbnail( 'large' ); ?>

@@ -90,7 +90,22 @@ function estudiamed_ehep_dashboard_data( $request ) {
 			break;
 		}
 	}
-	return array( 'subjects' => (object) $subjects, 'topics' => (object) $topics, 'favoriteTopics' => (object) $favorite_topics, 'stats' => $stats, 'history' => $history, 'page' => $page, 'active' => (int) $active );
+	$learning = array();
+	if ( function_exists( 'estudia_academy_recommendation' ) ) {
+		$weak = array_filter( $stats['subjects'], static function ( $subject ) {
+			return $subject['total'] >= 3 && $subject['correct'] < $subject['total'];
+		} );
+		uasort( $weak, static function ( $left, $right ) {
+			return ( $left['correct'] / $left['total'] ) <=> ( $right['correct'] / $right['total'] );
+		} );
+		foreach ( array_slice( array_keys( $weak ), 0, 3 ) as $name ) {
+			$resource = estudia_academy_recommendation( $name );
+			if ( $resource ) {
+				$learning[ $name ] = $resource;
+			}
+		}
+	}
+	return array( 'subjects' => (object) $subjects, 'topics' => (object) $topics, 'favoriteTopics' => (object) $favorite_topics, 'stats' => $stats, 'learning' => (object) $learning, 'history' => $history, 'page' => $page, 'active' => (int) $active );
 }
 
 function estudiamed_ehep_start( $request ) {

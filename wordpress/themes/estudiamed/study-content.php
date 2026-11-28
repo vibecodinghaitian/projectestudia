@@ -3,14 +3,18 @@
   <?php if ( function_exists( 'estudia_campus_announcements' ) ) { estudia_campus_announcements( 'home' ); } ?>
   <section class="hero" aria-labelledby="intro">
     <div class="hero-copy">
-      <p class="eyebrow"><?php echo esc_html( estudiamed_translate( 'Preparação para exames médicos', 'Preparación para exámenes médicos' ) ); ?></p>
-      <h1 id="intro"><?php echo esc_html( estudiamed_translate( 'Estude medicina.', 'Estudia medicina.' ) ); ?><br><span><?php echo esc_html( estudiamed_translate( 'Prepare-se para a prova.', 'Prepárate para tu examen.' ) ); ?></span></h1>
-      <p><?php echo esc_html( estudiamed_translate( 'Resolva questões, pratique com simulados e acompanhe sua evolução no EHEP Equador e no Revalida Brasil.', 'Resuelve preguntas, practica con simulacros y sigue tu progreso en el EHEP Ecuador y el Revalida Brasil.' ) ); ?></p>
+      <h1 id="intro">Estudia medicina.<br><span>Prepárate para tu examen.</span></h1>
+      <p>Aprende por especialidad y practica para EHEP Ecuador o Revalida Brasil.</p>
       <div class="actions">
-        <a class="btn btn-light" href="#exames"><?php echo esc_html( estudiamed_translate( 'Escolher exame', 'Elegir examen' ) ); ?></a>
-        <a class="btn btn-outline" href="#praticar"><?php echo esc_html( estudiamed_translate( 'Começar a praticar', 'Empezar a practicar' ) ); ?></a>
+        <a class="btn btn-light" href="#exames">Elegir examen</a>
+        <?php if ( function_exists( 'estudia_academy_catalog' ) ) : ?>
+          <a class="btn btn-outline" href="#cursos">Explorar cursos</a>
+        <?php else : ?>
+          <a class="btn btn-outline" href="#temas">Explorar especialidades</a>
+        <?php endif; ?>
       </div>
     </div>
+    <img class="hero-visual" src="<?php echo esc_url( get_template_directory_uri() . '/assets/medical-lab.webp' ); ?>" alt="" fetchpriority="high">
   </section>
   <section id="exames" class="section">
     <header class="section-heading">
@@ -39,6 +43,9 @@
     </details>
   </section>
 </div>
+<?php if ( function_exists( 'estudia_academy_catalog' ) ) : ?>
+  <?php estudia_academy_catalog(); ?>
+<?php endif; ?>
 <?php get_template_part( 'topics' ); ?>
 <?php if ( shortcode_exists( 'estudiamed_quiz' ) ) : ?>
 <section id="quiz-general" class="section wrap">
@@ -49,13 +56,16 @@
 <section id="praticar" class="section section-alt">
   <div class="wrap">
     <header><h2><?php echo esc_html( estudiamed_translate( 'Prática Revalida', 'Práctica Revalida' ) ); ?></h2><p><?php echo esc_html( estudiamed_translate( 'Selecione uma especialidade para treinar ou faça um simulado cronometrado com todas as questões do catálogo.', 'Selecciona una especialidad para practicar o realiza un simulacro cronometrado con todas las preguntas del catálogo.' ) ); ?></p></header>
+    <p><a href="https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/revalida">Información oficial del Inep</a></p>
     <noscript><?php echo esc_html( estudiamed_translate( 'Ative o JavaScript para acessar a área de estudo.', 'Activa JavaScript para acceder al área de estudio.' ) ); ?></noscript>
     <div class="panel">
       <form id="configurar" class="filters">
+        <label>Idioma del contenido <select id="revalida-language"><option value="es">Español</option><option value="pt-BR">Português (Brasil)</option></select></label>
         <label><?php echo esc_html( estudiamed_translate( 'Especialidade', 'Especialidad' ) ); ?> <select id="especialidade"><option value=""><?php echo esc_html( estudiamed_translate( 'Todas as especialidades', 'Todas las especialidades' ) ); ?></option></select></label>
         <button class="btn" name="modo" value="treino"><?php echo esc_html( estudiamed_translate( 'Iniciar treino', 'Iniciar práctica' ) ); ?></button>
         <button class="btn btn-outline" name="modo" value="simulado"><?php echo esc_html( estudiamed_translate( 'Iniciar simulado', 'Iniciar simulacro' ) ); ?></button>
       </form>
+      <p class="muted">Preguntas de muestra. El historial se guarda en este navegador.</p>
       <p id="disponibilidade" class="muted" role="status"></p>
       <div id="sessao" hidden></div>
     </div>
@@ -66,8 +76,12 @@
   <div id="metricas" class="metrics"></div>
 </section>
 
-<section class="section wrap">
-  <h2>Prueba una pregunta</h2>
+<section id="casos-clinicos" class="section wrap">
+  <h2>Casos clínicos y ejercicios</h2>
+  <?php if ( shortcode_exists( 'estudiamed_quiz' ) ) : ?>
+    <p>En el banco, selecciona «Caso clínico» para practicar con un escenario.</p>
+    <p><a href="#quiz-general">Abrir banco de preguntas</a></p>
+  <?php endif; ?>
   <details class="panel">
     <summary>Un estudio sigue a 200 personas inicialmente sanas. En un año aparecen 20 casos. ¿Cuál es el riesgo acumulado?</summary>
     <p><strong>Respuesta: 10 %.</strong> Se divide el número de casos nuevos (20) por las personas en riesgo al inicio (200). El resultado, 0,10, equivale al 10 %.</p>

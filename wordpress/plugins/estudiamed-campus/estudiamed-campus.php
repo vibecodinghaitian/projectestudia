@@ -2,12 +2,13 @@
 /**
  * Plugin Name: EstudiaMed Campus
  * Description: Acceso de estudiantes, blog y avisos del campus.
- * Version: 1.1.0
+ * Version: 1.2.0
  */
 defined( 'ABSPATH' ) || exit;
 
 define( 'ESTUDIA_CAMPUS_FILE', __FILE__ );
 require_once __DIR__ . '/editor.php';
+require_once __DIR__ . '/academy.php';
 require_once __DIR__ . '/welcome.php';
 require_once __DIR__ . '/gemini.php';
 
@@ -124,7 +125,7 @@ function estudia_campus_account_form( $route, $message, $email, $name ) {
 
 function estudia_campus_panel() {
 	$ehep = function_exists( 'estudiamed_ehep_url' ) ? estudiamed_ehep_url() : '';
-	$links = array( 'Temas' => home_url( '/#temas' ), 'Banco y práctica' => home_url( '/#quiz-general' ), 'Blog' => estudia_campus_url( 'blog' ) );
+	$links = array( 'Cursos médicos' => home_url( '/#cursos' ), 'Temas' => home_url( '/#temas' ), 'Banco y práctica' => home_url( '/#quiz-general' ), 'Blog' => estudia_campus_url( 'blog' ) );
 	if ( $ehep ) {
 		$links = array( 'Continuar estudiando' => $ehep, 'Simulacros EHEP' => $ehep . '#ehep-config', 'Favoritas e historial' => $ehep . '#ehep-config' ) + $links;
 	}
@@ -135,6 +136,7 @@ function estudia_campus_panel() {
 		echo '<a class="card" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>';
 	}
 	echo '</div>';
+	estudia_academy_panel();
 	estudia_welcome_profile();
 }
 

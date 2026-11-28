@@ -109,11 +109,19 @@ for (const root of document.querySelectorAll('[data-ehep-url]')) {
       element('p', stats.total ? percent(stats.correct, stats.total) + ' de aciertos' : 'Sin resultados todavía.'));
     const revision = select('.ehep-revision');
     revision.replaceChildren();
-    const ranked = Object.entries(stats.subjects).sort(([, a], [, b]) => a.correct / a.total - b.correct / b.total);
-    if (!ranked.length) revision.append(element('p', 'Completa un intento para obtener recomendaciones.'));
+    const ranked = Object.entries(stats.subjects)
+      .filter(([, record]) => record.total >= 3 && record.correct < record.total)
+      .sort(([, a], [, b]) => a.correct / a.total - b.correct / b.total);
+    if (!ranked.length) revision.append(element('p', 'Practica más preguntas para identificar áreas de repaso.'));
     for (const [name, record] of ranked.slice(0, 3)) {
       const available = Object.hasOwn(data.subjects, name);
       revision.append(element('p', name + ' · ' + record.correct + '/' + record.total + ' aciertos'));
+      const resource = data.learning?.[name];
+      if (resource) {
+        const lesson = element('a', 'Estudiar: ' + resource.label);
+        lesson.href = resource.url;
+        revision.append(lesson);
+      }
       if (available) revision.append(button('Repasar ' + name, () => {
         subject.value = name;
         refreshTopics();

@@ -11,19 +11,19 @@
 <header class="site-header">
   <div class="wrap top">
     <a class="brand" href="<?php echo esc_url( estudiamed_home() ); ?>"><span class="mark" aria-hidden="true">+</span>EstudiaMed</a>
-    <nav aria-label="<?php echo esc_html( estudiamed_translate( 'Menu principal', 'Menú principal' ) ); ?>">
-      <a href="<?php echo esc_url( estudiamed_home( '#temas' ) ); ?>">Temas</a>
+    <button class="menu-toggle" type="button" aria-controls="primary-nav" aria-expanded="false" hidden>Menú</button>
+    <nav id="primary-nav" aria-label="Menú principal">
+      <a href="<?php echo esc_url( estudiamed_home( '#exames' ) ); ?>">Exámenes</a>
       <?php $ehep_menu_url = function_exists( 'estudiamed_ehep_url' ) ? estudiamed_ehep_url() : ''; ?>
       <?php if ( $ehep_menu_url ) : ?>
         <a href="<?php echo esc_url( $ehep_menu_url ); ?>"<?php if ( is_page( 'ehep-ecuador' ) ) : ?> aria-current="page"<?php endif; ?>>Examen de Ecuador (EHEP)</a>
       <?php endif; ?>
-      <a href="<?php echo esc_url( estudiamed_home( '#exames' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Exames', 'Exámenes' ) ); ?></a>
-      <?php if ( shortcode_exists( 'estudiamed_quiz' ) ) : ?>
-        <a href="<?php echo esc_url( estudiamed_home( '#quiz-general' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Quiz Geral', 'Quiz General' ) ); ?></a>
+      <a href="<?php echo esc_url( estudiamed_home( shortcode_exists( 'estudiamed_quiz' ) ? '#quiz-general' : '#praticar' ) ); ?>">Banco de preguntas</a>
+      <?php if ( function_exists( 'estudia_academy_catalog' ) ) : ?>
+        <a href="<?php echo esc_url( estudiamed_home( '#cursos' ) ); ?>">Cursos</a>
       <?php endif; ?>
-      <a href="<?php echo esc_url( estudiamed_home( '#praticar' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Praticar', 'Practicar' ) ); ?></a>
-      <a href="<?php echo esc_url( estudiamed_home( '#progresso' ) ); ?>"><?php echo esc_html( estudiamed_translate( 'Progresso', 'Progreso' ) ); ?></a>
-      <?php if ( function_exists( 'estudia_campus_url' ) ) : ?><a href="<?php echo esc_url( estudia_campus_url( 'blog' ) ); ?>">Blog</a><?php endif; ?>
+      <a href="<?php echo esc_url( estudiamed_home( '#temas' ) ); ?>">Especialidades</a>
+      <a href="<?php echo esc_url( estudiamed_home( '#casos-clinicos' ) ); ?>">Casos clínicos</a>
     </nav>
     <div class="header-tools">
     <?php if ( function_exists( 'estudia_campus_url' ) ) : ?>
