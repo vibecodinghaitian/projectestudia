@@ -46,7 +46,7 @@ function estudia_ehep_import_screen() {
 
 function estudia_ehep_columns() {
 	return array( 'stem', 'subject', 'topic', 'source', 'call', 'category', 'type', 'key', 'option_a', 'option_b', 'option_c', 'option_d',
-		'explanation', 'reason_a', 'reason_b', 'reason_c', 'reason_d', 'lang', 'difficulty', 'url' );
+		'explanation', 'reason_a', 'reason_b', 'reason_c', 'reason_d', 'lang', 'difficulty', 'url', 'option_e', 'reason_e' );
 }
 
 add_action( 'admin_post_estudia_ehep_template', static function () {
@@ -66,13 +66,23 @@ function estudia_ehep_import_normalize( $raw, $module ) {
 		$item[ $field ] = sanitize_textarea_field( is_string( $raw[ $field ] ?? null ) ? $raw[ $field ] : '' );
 	}
 	$key = strtoupper( (string) ( is_scalar( $raw['key'] ?? null ) ? $raw['key'] : '' ) );
-	$item['key'] = strlen( $key ) === 1 ? strpos( 'ABCD', $key ) : false;
-	foreach ( array( 'a', 'b', 'c', 'd' ) as $index => $letter ) {
-		$item['options'][] = sanitize_textarea_field( $raw['options'][ $index ] ?? $raw[ 'option_' . $letter ] ?? '' );
-		$item['reasons'][] = sanitize_textarea_field( $raw['reasons'][ $index ] ?? $raw[ 'reason_' . $letter ] ?? '' );
+	$item['key'] = strlen( $key ) === 1 ? strpos( 'ABCDE', $key ) : false;
+	foreach ( array( 'options', 'reasons' ) as $field ) {
+		if ( isset( $raw[ $field ] ) && ( ! is_array( $raw[ $field ] ) || array_values( $raw[ $field ] ) !== $raw[ $field ] || count( $raw[ $field ] ) > 5 ) ) {
+			return null;
+		}
 	}
-	if ( ! $item['stem'] || ! $item['subject'] || ! $item['source'] || false === $item['key'] ||
-		count( array_unique( array_filter( $item['options'] ) ) ) !== 4 || ! $item['explanation'] || count( array_filter( $item['reasons'] ) ) !== 4 ) return null;
+	foreach ( array( 'a', 'b', 'c', 'd', 'e' ) as $index => $letter ) {
+		$option = sanitize_textarea_field( $raw['options'][ $index ] ?? $raw[ 'option_' . $letter ] ?? '' );
+		$reason = sanitize_textarea_field( $raw['reasons'][ $index ] ?? $raw[ 'reason_' . $letter ] ?? '' );
+		if ( 4 === $index && '' === $option && '' === $reason ) {
+			break;
+		}
+		$item['options'][] = $option;
+		$item['reasons'][] = $reason;
+	}
+	if ( ! $item['stem'] || ! $item['subject'] || ! $item['source'] || ! $item['explanation'] ||
+		! estudiamed_ehep_valid_choices( $item, $module ) ) return null;
 	if ( 'general' === $module ) {
 		$item['lang'] = 'pt' === ( $raw['lang'] ?? '' ) ? 'pt' : 'es';
 		$item['difficulty'] = in_array( $raw['difficulty'] ?? '', array( 'beginner', 'intermediate', 'advanced', 'exam' ), true ) ? $raw['difficulty'] : '';

@@ -40,8 +40,8 @@ function estudiamed_ehep_editor( $post ) {
 	echo '<p><label for="ehep_subject">Especialidad</label><br><input class="regular-text" id="ehep_subject" name="ehep_subject" value="' . esc_attr( $item['subject'] ?? '' ) . '"></p>';
 	echo '<p><label for="ehep_topic">Tema</label><br><input class="regular-text" id="ehep_topic" name="ehep_topic" value="' . esc_attr( $item['topic'] ?? '' ) . '"></p>';
 	echo '<p><label for="ehep_source">Fuente o procedencia</label><br><input class="regular-text" id="ehep_source" name="ehep_source" value="' . esc_attr( $item['source'] ?? '' ) . '"></p>';
-	echo '<p>Usa contenido educativo propio o autorizado. Selecciona la respuesta correcta y explica las cuatro alternativas.</p>';
-	foreach ( range( 0, 3 ) as $i ) {
+	echo '<p>Usa contenido educativo propio o autorizado. Selecciona la respuesta correcta y explica cada alternativa. La opción E es opcional y está disponible en Quiz General.</p>';
+	foreach ( range( 0, 4 ) as $i ) {
 		echo '<fieldset><legend>Opción ' . esc_html( chr( 65 + $i ) ) . '</legend>';
 		echo '<label><input type="radio" name="ehep_key" value="' . esc_attr( $i ) . '" ' . checked( $item['key'] ?? -1, $i, false ) . '> Correcta</label>';
 		echo '<p><label for="ehep_option_' . esc_attr( $i ) . '">Respuesta</label><br><textarea class="large-text" id="ehep_option_' . esc_attr( $i ) . '" name="ehep_options[' . esc_attr( $i ) . ']" rows="2">' . esc_textarea( $item['options'][ $i ] ?? '' ) . '</textarea></p>';
@@ -61,29 +61,48 @@ function estudiamed_ehep_editor( $post ) {
 
 }
 
+function estudiamed_ehep_valid_choices( $item, $module ) {
+	$options = $item['options'] ?? null;
+	$reasons = $item['reasons'] ?? null;
+	$key = $item['key'] ?? null;
+	if ( ! is_array( $options ) || ! is_array( $reasons ) || ! is_int( $key ) ||
+		! in_array( count( $options ), 'general' === $module ? array( 4, 5 ) : array( 4 ), true ) ||
+		array_values( $options ) !== $options || array_keys( $reasons ) !== array_keys( $options ) ||
+		! isset( $options[ $key ] ) || count( array_unique( $options ) ) !== count( $options ) ) {
+		return false;
+	}
+	return ! in_array( '', $options, true ) && ! in_array( '', $reasons, true );
+}
+
 function estudiamed_ehep_save_item( $id ) {
 	if ( wp_is_post_revision( $id ) || wp_is_post_autosave( $id ) || ! current_user_can( 'manage_options' ) ||
 		! isset( $_POST['estudia_ehep_nonce'] ) || ! is_string( $_POST['estudia_ehep_nonce'] ) ||
 		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['estudia_ehep_nonce'] ) ), 'estudia_ehep_edit' ) ) {
 		return;
 	}
+	$module = 'general' === ( $_POST['estudia_question_module'] ?? '' ) ? 'general' : 'ehep';
 	$item = array(
 		'subject' => sanitize_text_field( wp_unslash( $_POST['ehep_subject'] ?? '' ) ),
 		'topic' => sanitize_text_field( wp_unslash( $_POST['ehep_topic'] ?? '' ) ),
 		'source' => sanitize_text_field( wp_unslash( $_POST['ehep_source'] ?? '' ) ),
-		'key' => in_array( $_POST['ehep_key'] ?? '', array( '0', '1', '2', '3' ), true ) ? (int) $_POST['ehep_key'] : -1,
+		'key' => in_array( $_POST['ehep_key'] ?? '', array( '0', '1', '2', '3', '4' ), true ) ? (int) $_POST['ehep_key'] : -1,
 		'options' => array(),
 		'reasons' => array(),
 	);
-	foreach ( range( 0, 3 ) as $i ) {
-		$item['options'][] = sanitize_textarea_field( wp_unslash( $_POST['ehep_options'][ $i ] ?? '' ) );
-		$item['reasons'][] = sanitize_textarea_field( wp_unslash( $_POST['ehep_reasons'][ $i ] ?? '' ) );
+	foreach ( range( 0, 4 ) as $i ) {
+		$option = sanitize_textarea_field( wp_unslash( $_POST['ehep_options'][ $i ] ?? '' ) );
+		$reason = sanitize_textarea_field( wp_unslash( $_POST['ehep_reasons'][ $i ] ?? '' ) );
+		if ( 4 === $i && '' === $option && '' === $reason ) {
+			break;
+		}
+		$item['options'][] = $option;
+		$item['reasons'][] = $reason;
 	}
 	foreach ( array( 'call', 'category', 'type', 'original', 'explanation' ) as $field ) {
 		$item[ $field ] = sanitize_textarea_field( wp_unslash( $_POST[ 'ehep_' . $field ] ?? '' ) );
 	}
 	$item['archived'] = isset( $_POST['ehep_archived'] );
-	if ( 'general' === ( $_POST['estudia_question_module'] ?? '' ) ) {
+	if ( 'general' === $module ) {
 		$item['lang'] = 'pt' === ( $_POST['ehep_lang'] ?? '' ) ? 'pt' : 'es';
 		$difficulty = sanitize_key( $_POST['ehep_difficulty'] ?? '' );
 		$item['difficulty'] = in_array( $difficulty, array( 'beginner', 'intermediate', 'advanced', 'exam' ), true ) ? $difficulty : '';
@@ -91,7 +110,7 @@ function estudiamed_ehep_save_item( $id ) {
 	if ( isset( $_POST['ehep_url'] ) && is_string( $_POST['ehep_url'] ) ) {
 		$item['url'] = esc_url_raw( wp_unslash( $_POST['ehep_url'] ), array( 'https', 'http' ) );
 	}
-	update_post_meta( $id, '_estudia_question_module', 'general' === ( $_POST['estudia_question_module'] ?? '' ) ? 'general' : 'ehep' );
+	update_post_meta( $id, '_estudia_question_module', $module );
 	update_post_meta( $id, '_estudia_ehep', wp_slash( $item ) );
 }
 add_action( 'save_post_estudia_ehep_item', 'estudiamed_ehep_save_item' );
@@ -103,8 +122,7 @@ function estudiamed_ehep_editorial_items( $module ) {
 		$target = get_post_meta( $post->ID, '_estudia_question_module', true ) ?: 'ehep';
 		if ( $target !== $module ) continue;
 		$item = get_post_meta( $post->ID, '_estudia_ehep', true );
-		if ( empty( $item['subject'] ) || empty( $item['source'] ) || ! isset( $item['key'], $item['options'][ $item['key'] ] ) ||
-			count( array_filter( $item['options'] ) ) !== 4 || count( array_filter( $item['reasons'] ) ) !== 4 || '' === trim( $post->post_title ) ) continue;
+		if ( empty( $item['subject'] ) || empty( $item['source'] ) || ! estudiamed_ehep_valid_choices( $item, $module ) || '' === trim( $post->post_title ) ) continue;
 		$item['id'] = 'wp-' . $post->ID;
 		$item['stem'] = $post->post_title;
 		$items[] = $item;

@@ -12,6 +12,8 @@ En modo Examen el servidor guarda respuestas parciales y aplica el plazo aunque 
 
 En **Ajustes → EstudiaMed Quiz**, el catálogo adicional permite introducir categorías y materias por idioma. El editor de **Preguntas EHEP** y su importador CSV/JSON se reutilizan con el módulo **Quiz General**. Los temas se derivan de las preguntas publicadas de la materia. Las importaciones quedan en borrador. Revisa las referencias, la clave y los distractores antes de publicar. Puedes archivar una pregunta para excluirla de los futuros intentos. Esto conserva las copias en resultados anteriores.
 
+Quiz General acepta cuatro o cinco opciones. En CSV, deja `option_e` y `reason_e` en blanco para las preguntas de cuatro opciones. En JSON, envía cuatro o cinco elementos en `options` y `reasons`. La clave puede ser A–D o A–E según corresponda.
+
 Tipos disponibles para edición: `mcq`, `case`, `reasoning`, `basic` y `application`. Los campos opcionales de una importación general incluyen `lang` (`es` o `pt`), `difficulty` (`beginner`, `intermediate`, `advanced`, `exam`) y `url` (referencia). El campo `source` recoge la cita bibliográfica. Para publicar una traducción, importa o crea un registro específico en ese idioma.
 
 ### Referencia curricular
