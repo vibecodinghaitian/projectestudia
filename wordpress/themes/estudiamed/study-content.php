@@ -3,7 +3,7 @@
   <?php if ( function_exists( 'estudia_campus_announcements' ) ) { estudia_campus_announcements( 'home' ); } ?>
   <section class="hero" aria-labelledby="intro">
     <div class="hero-copy">
-      <h1 id="intro">Estudia medicina.<br><span>Prepárate para tu examen.</span></h1>
+      <h1 id="intro">Estudia medicina.<br><span>Practica tu examen.</span></h1>
       <p>Aprende por especialidad y practica para EHEP Ecuador o Revalida Brasil.</p>
       <div class="actions">
         <a class="btn btn-light" href="#exames">Elegir examen</a>

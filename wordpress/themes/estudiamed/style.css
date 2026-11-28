@@ -48,7 +48,7 @@ Text Domain: estudiamed
 :root{--paper:#f8f7f2;--ink:#142d3e;--muted:#465f66;--dark:#102b39;--teal:#105f55}
 .top{gap:16px}.top nav{gap:12px 17px}.menu-toggle{border:1px solid var(--line);border-radius:8px;padding:.45rem .8rem;background:white;color:var(--ink);font-weight:700}
 .hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:center;gap:clamp(22px,4vw,58px);padding:clamp(24px,5vw,68px)}
-.hero h1{font-size:clamp(2.45rem,4.6vw,4.4rem)}
+.hero h1{font-size:clamp(2rem,4.15vw,3.7rem)}
 .hero-visual{display:block;width:100%;max-height:420px;aspect-ratio:1.2;object-fit:cover;border-radius:16px}
 .academy-cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))}
 @media(max-width:970px){.top{flex-wrap:wrap;padding-block:12px}.top>nav{width:100%;order:3;padding:8px 0;gap:10px 18px}.top .header-tools{margin-left:auto}}
