@@ -1,13 +1,23 @@
 # EstudiaMed Quiz General
 
-Activate the plugin alongside the EstudiaMed theme. The theme adds a Quiz General tab when the shortcode is available. The quiz uses WordPress login and the Spanish categories and subjects (and legacy Portuguese support when hosted by a compatible theme) recovered from the original EstudiaMed build. EHEP remains a separate question bank.
+## Quiz General 1.2
 
-## Provider setup
+El shortcode y las rutas de creación y entrega de intentos siguen en sus ubicaciones originales. La portada de EstudiaMed usa la sesión WordPress. El módulo mantiene los favoritos y el historial en la misma clave local por cuenta. Los nuevos resultados agregan tema, modo, idioma, duración y marcas de revisión. El historial reside en el navegador, por lo que sus datos dependen del dispositivo y del perfil de navegador.
 
-Go to **Settings → EstudiaMed Quiz** as a WordPress administrator. Choose Gemini or OpenAI, supply a model with JSON output support and enter the API key directly in WordPress. The key is stored in a server-side, non-autoloaded option, is absent from the HTML and API responses, and can be removed in settings. Limit the provider key's scope and budget in its own dashboard. AI is off by default. Once configured, the learner can opt in per session, and the server uses it only for the shortfall after checking the selected question bank. The app labels generated questions as unreviewed and does not publish them to the bank.
+El formulario ofrece solo combinaciones con preguntas de banco. El orden prioriza ítems que el estudiante todavía no ha visto en su historial local. Si se solicita más contenido del disponible, se ofrece iniciar con la cantidad real. Las preguntas de muestra se identifican en el ejercicio. La generación de IA existente queda disponible como código y configuración del proveedor, pero Quiz General no la usa para completar intentos.
 
-## Question import
+En modo Examen el servidor guarda respuestas parciales y aplica el plazo aunque el navegador se retrase. Al vencer, entrega las respuestas aceptadas antes del plazo. La calificación y sus explicaciones se revelan al finalizar. El intento de examen se asocia a la cuenta y el token temporal. Un intento activo no se puede recuperar al recargar la página.
 
-Convert each supplied PDF and answer key to reviewed JSON. For scanned PDFs, use OCR and compare question stems, answer alternatives and referenced illustrations with the original. In the same settings screen, upload an array of up to 500 items. Each item uses `lang` (`es` or `pt`), `type` (`mcq` or `case`), exact `category` and `subject` strings from `catalog.json`, `stem`, four distinct `options`, an optional `topic`, a zero-based integer `key`, an `explanation` and a `source` with the PDF and page. Reimporting the same stem in the same language, type, category and subject updates that record. No PDF has been submitted for this general quiz yet.
+### Edición
 
-General Quiz withholds keys and explanations on the server during exam mode. Completed attempts and favorites are stored in the learner’s browser. The separate EHEP simulator retains server-side scoring and account-level history and favorites.
+En **Ajustes → EstudiaMed Quiz**, el catálogo adicional permite introducir categorías y materias por idioma. El editor de **Preguntas EHEP** y su importador CSV/JSON se reutilizan con el módulo **Quiz General**. Los temas se derivan de las preguntas publicadas de la materia. Las importaciones quedan en borrador. Revisa las referencias, la clave y los distractores antes de publicar. Puedes archivar una pregunta para excluirla de los futuros intentos. Esto conserva las copias en resultados anteriores.
+
+Tipos disponibles para edición: `mcq`, `case`, `reasoning`, `basic` y `application`. Los campos opcionales de una importación general incluyen `lang` (`es` o `pt`), `difficulty` (`beginner`, `intermediate`, `advanced`, `exam`) y `url` (referencia). El campo `source` recoge la cita bibliográfica. Para publicar una traducción, importa o crea un registro específico en ese idioma.
+
+### Referencia curricular
+
+Se consultaron los pénsum de Medicina de UTESA con vigencia enero de 2013 (Of. SG. No. 129/12) y enero de 2024 (Of. SG. No. 101/22). Ambos registran Anatomía I y II (MED-172, MED-212), Fisiología I y II (MED-232, MED-292), Bioestadística (MED-160) y Epidemiología (MED-662). El catálogo incorpora las materias faltantes de esa comparación sin cambiar las etiquetas de las preguntas existentes. «Salud Pública» es una agrupación editorial de EstudiaMed. Los pénsum orientan la clasificación curricular. Cada pregunta conserva su fuente médica por separado.
+
+### Verificación local
+
+Activa EstudiaMed Campus, EHEP y Quiz General junto al tema EstudiaMed en una instalación de pruebas. Crea dos cuentas de estudiante locales, abre `/#quiz-general` y completa una práctica y un simulacro. Verifica que el simulacro solo revele la corrección al entregar y que el token no sea accesible desde otra cuenta. Revisa el historial al recargar y cambia a portugués para comprobar el caso traducido.

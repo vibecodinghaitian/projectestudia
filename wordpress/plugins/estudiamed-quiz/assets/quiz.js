@@ -1,245 +1,413 @@
 'use strict';
 
 for (const root of document.querySelectorAll('[data-estudia-quiz]')) {
-  const pt = root.dataset.lang === 'pt';
-  const t = (es, portuguese) => pt ? portuguese : es;
-  const catalog = JSON.parse(root.dataset.catalog);
-  const topicCatalog = JSON.parse(root.dataset.topics || '{}');
+  const catalogs = JSON.parse(root.dataset.topics);
   const storageKey = 'estudiamed-quiz-v1-' + root.dataset.profile;
   let saved = { favorites: [], attempts: [] };
   try {
-    const previous = JSON.parse(localStorage.getItem(storageKey) || 'null');
+    const previous = JSON.parse(localStorage.getItem(storageKey));
     if (Array.isArray(previous?.favorites) && Array.isArray(previous?.attempts)) saved = previous;
   } catch {}
-  function save() {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(saved));
-    } catch {
-      storageNotice.textContent = 'El navegador no pudo guardar este cambio.';
-    }
-  }
 
-  function node(tag, text) {
-    const element = document.createElement(tag);
-    if (text) element.textContent = text;
-    return element;
+  let lang = root.dataset.lang;
+  try {
+    lang = localStorage.getItem(storageKey + '-lang') || lang;
+  } catch {}
+  if (!['es', 'pt'].includes(lang)) lang = 'es';
+
+  const t = (es, pt) => lang === 'pt' ? pt : es;
+  const typeLabels = () => ({
+    mcq: t('Opción múltiple', 'Múltipla escolha'), case: 'Caso clínico',
+    reasoning: t('Razonamiento clínico', 'Raciocínio clínico'), basic: t('Conocimientos básicos', 'Conhecimentos básicos'),
+    application: t('Aplicación clínica', 'Aplicação clínica')
+  });
+  const make = (tag, text = '') => Object.assign(document.createElement(tag), {textContent: text});
+  function button(text, action) {
+    const control = make('button', text);
+    control.type = 'button';
+    control.className = 'btn btn-outline';
+    control.addEventListener('click', action);
+    return control;
   }
-  function labeled(label, input) {
-    const wrapper = node('label', label + ' ');
-    if (input.type !== 'radio') input.setAttribute('aria-label', label);
-    wrapper.append(input);
+  function label(text, control) {
+    const wrapper = make('label', text + ' ');
+    if (control.type === 'checkbox') wrapper.className = 'quiz-check';
+    if (text && control.type !== 'radio') control.setAttribute('aria-label', text);
+    wrapper.append(control);
     return wrapper;
   }
-  function options(values) {
-    const input = node('select');
-    values.forEach(([name, value]) => input.add(new Option(name, value)));
+  function choices(select, entries, previous = select.value) {
+    select.replaceChildren(...entries.map(([key, value]) => new Option(value, key)));
+    if (entries.some(([key]) => key === previous)) select.value = previous;
+    select.disabled = !entries.length;
+  }
+  function number(max, value) {
+    const input = make('input');
+    Object.assign(input, {type: 'number', min: '1', max: String(max), value: String(value), required: true});
     return input;
   }
-  const form = node('form');
-  form.className = 'filters';
-  const type = options([[t('Opción múltiple', 'Múltipla escolha'), 'mcq'], [t('Caso clínico', 'Caso clínico'), 'case']]);
-  const category = options([[t('Selecciona una categoría', 'Selecione uma categoria'), ''], ...Object.keys(catalog).map(key => [key, key])]);
-  const subject = options([]);
-  const topic = options([]);
-  const favorites = node('input');
-  favorites.type = 'checkbox';
-  const count = node('input');
-  count.type = 'number';
-  count.min = '1';
-  count.max = '10';
-  count.value = '1';
-  count.required = true;
-  const mode = options([[t('Estudio', 'Estudo'), 'study'], [t('Examen', 'Prova'), 'exam']]);
-  const ai = node('input');
-  ai.type = 'checkbox';
-  const submit = node('button', t('Generar', 'Gerar'));
-  submit.className = 'btn';
-  const status = node('p');
-  status.setAttribute('role', 'status');
-  const output = node('div');
-  const storageNotice = node('p', t('Los resultados y favoritos de Quiz General se guardan en este navegador.', 'Os resultados e favoritos do Quiz Geral são salvos neste navegador.'));
-  const history = node('div');
-  form.append(labeled(t('Tipo de contenido', 'Tipo de conteúdo'), type),
-    labeled(t('Categoría', 'Categoria'), category), labeled(t('Materia', 'Matéria'), subject),
-    labeled(t('Tema', 'Tema'), topic), labeled(t('Número de preguntas', 'Número de questões'), count), labeled(t('Modo', 'Modo'), mode),
-    labeled(t('Solo favoritas', 'Apenas favoritas'), favorites));
-  if (root.dataset.ai === '1') {
-    form.append(labeled(t('Usar IA si faltan preguntas', 'Usar IA se faltarem questões'), ai));
-  }
-  form.append(submit);
-  root.append(form, storageNotice, status, output, history);
-
-  function refresh() {
-    subject.replaceChildren();
-    for (const name of catalog[category.value] || []) subject.add(new Option(name, name));
-    subject.disabled = !subject.options.length;
-    submit.disabled = subject.disabled;
-    refreshTopics();
-  }
-  function refreshTopics() {
-    const topics = topicCatalog[category.value]?.[subject.value]?.[type.value] || {};
-    topic.replaceChildren(new Option(t('Todos los temas', 'Todos os temas'), ''));
-    for (const name of Object.keys(topics)) topic.add(new Option(name, name));
-    topic.disabled = !Object.keys(topics).length;
-  }
-  subject.addEventListener('change', refreshTopics);
-  type.addEventListener('change', refreshTopics);
-  category.addEventListener('change', refresh);
-  refresh();
-
   function correction(item, answer) {
-    const result = node('div');
+    const result = make('div');
     result.className = 'feedback';
-    result.append(node('strong', answer == null ? t('Omitida', 'Omitida') : answer === item.key ? t('Correcta', 'Correta') : t('Incorrecta', 'Incorreta')),
-      node('p', t('Respuesta correcta: ', 'Resposta correta: ') + item.options[item.key]),
-      node('p', item.explanation));
-    if (item.reasons) {
-      const list = node('ul');
-      item.options.forEach((option, index) => list.append(node('li', option + ' — ' + item.reasons[index])));
+    result.append(make('strong', answer == null ? t('Omitida', 'Omitida') : answer === item.key ? t('Correcta', 'Correta') : t('Incorrecta', 'Incorreta')));
+    if (answer != null) result.append(make('p', t('Tu respuesta: ', 'Sua resposta: ') + item.options[answer]));
+    result.append(make('p', t('Respuesta correcta: ', 'Resposta correta: ') + item.options[item.key]), make('p', item.explanation));
+    if (Array.isArray(item.reasons)) {
+      const list = make('ul');
+      item.options.forEach((option, index) => {
+        if (item.reasons[index]) list.append(make('li', option + ' — ' + item.reasons[index]));
+      });
       result.append(list);
+    }
+    if (item.source) result.append(make('p', item.source));
+    if (typeof item.url === 'string' && /^https?:\/\//i.test(item.url)) {
+      const link = make('a', t('Consultar referencia', 'Consultar referência'));
+      link.href = item.url;
+      result.append(link);
     }
     return result;
   }
-
-  function paintHistory() {
-    history.replaceChildren(node('h3', t('Intentos guardados', 'Sessões salvas')));
-    if (!saved.attempts.length) {
-      history.append(node('p', t('Todavía no hay intentos.', 'Ainda não há sessões.')));
-    }
-    for (const record of saved.attempts) {
-      const disclosure = node('details');
-      disclosure.append(node('summary', new Date(record.date).toLocaleDateString(root.dataset.lang) +
-        ' · ' + record.subject + ' · ' + record.correct + '/' + record.items.length));
-      record.items.forEach((item, index) => {
-        disclosure.append(node('p', item.stem), correction(item, record.answers[index]));
-      });
-      history.append(disclosure);
+  function request(path, body) {
+    const url = new URL(root.dataset.endpoint, location.href);
+    if (url.searchParams.has('rest_route')) url.searchParams.set('rest_route', url.searchParams.get('rest_route') + path);
+    else url.pathname = url.pathname.replace(/\/$/, '') + path;
+    return fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-WP-Nonce': root.dataset.nonce},
+      body: JSON.stringify(body)
+    }).then(async response => {
+      if (!response.ok) throw new Error(t('No se pudo completar la operación. Vuelve a intentarlo.', 'Não foi possível concluir. Tente novamente.'));
+      return response.json();
+    });
+  }
+  function persist() {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(saved));
+    } catch {
+      notice.textContent = t('El navegador no pudo guardar los cambios.', 'O navegador não conseguiu salvar as alterações.');
     }
   }
-  paintHistory();
 
-  function render(items, practice, token) {
-    output.replaceChildren();
-    const answers = new Map();
-    const quiz = node('form');
-    items.forEach((item, index) => {
-      const fieldset = node('fieldset');
-      fieldset.className = 'options';
-      fieldset.append(node('legend', (index + 1) + '. ' + item.stem));
-      if (item.origin === 'sample') {
-        fieldset.append(node('p', t('Muestra original de EstudiaMed', 'Amostra original do EstudiaMed')));
-      }
-      if (item.id) {
-        const star = node('button');
-        star.type = 'button';
-        const paint = () => {
-          const active = saved.favorites.includes(item.id);
-          star.textContent = active ? t('Quitar de favoritas', 'Remover dos favoritos') : t('Guardar como favorita', 'Salvar nos favoritos');
-          star.setAttribute('aria-pressed', String(active));
-        };
-        star.addEventListener('click', () => {
-          saved.favorites = saved.favorites.includes(item.id)
-            ? saved.favorites.filter(id => id !== item.id)
-            : [...saved.favorites, item.id].slice(-300);
-          save();
-          paint();
-        });
-        paint();
-        quiz.append(star);
-      }
-      if (item.origin === 'ai') {
-        fieldset.append(node('p', t('Generada por IA · sin revisión clínica', 'Gerada por IA · sem revisão clínica')));
-      } else if (item.source) {
-        fieldset.append(node('p', item.source));
-      }
-      item.options.forEach((option, value) => {
-        const input = node('input');
-        input.type = 'radio';
-        input.name = 'item' + index;
-        input.required = false;
-        input.addEventListener('change', () => {
-          answers.set(index, value);
-          if (practice) {
-            fieldset.append(correction(item, value));
-            fieldset.disabled = true;
-          }
-        });
-        fieldset.append(labeled(option, input));
-      });
-      quiz.append(fieldset);
-    });
-    const finish = node('button', practice ? t('Guardar práctica', 'Salvar prática') : t('Entregar examen', 'Entregar prova'));
-    finish.className = 'btn';
-    quiz.append(finish);
-    quiz.addEventListener('submit', async event => {
+  const language = make('select');
+  choices(language, [['es', 'Español'], ['pt', 'Português']], lang);
+  const notice = make('p');
+  const status = make('p');
+  status.setAttribute('role', 'status');
+  const configuration = make('div');
+  const output = make('div');
+  const history = make('div');
+  root.append(label('Idioma', language), configuration, notice, status, output, history);
+  let current = null;
+  let retry = null;
+  let starting = false;
+
+  language.addEventListener('change', () => {
+    lang = language.value;
+    try { localStorage.setItem(storageKey + '-lang', lang); } catch {}
+    status.textContent = '';
+    retry = null;
+    showConfiguration();
+  });
+
+  function showConfiguration(initial = {}) {
+    root.lang = lang === 'pt' ? 'pt-BR' : 'es';
+    notice.textContent = t('Tu historial y tus favoritas se guardan en este navegador.', 'Seu histórico e suas favoritas são salvos neste navegador.');
+    const catalog = Object.fromEntries(Object.entries(catalogs[lang] || {}));
+    const form = make('form');
+    form.className = 'filters quiz-filters';
+    const type = make('select');
+    const category = make('select');
+    const subject = make('select');
+    const topic = make('select');
+    const mode = make('select');
+    const count = number(100, 1);
+    const minutes = number(180, 15);
+    const minutesLabel = label(t('Minutos del examen', 'Minutos da prova'), minutes);
+    const countLabel = label('', count);
+    const availability = make('p');
+    availability.setAttribute('aria-live', 'polite');
+    const favorites = make('input');
+    favorites.type = 'checkbox';
+    const submit = make('button', t('Generar quiz', 'Gerar quiz'));
+    submit.className = 'btn';
+    const titles = typeLabels();
+    const types = Object.keys(titles).filter(key =>
+      Object.values(catalog).some(subjects => Object.values(subjects).some(kinds => Object.hasOwn(kinds, key))));
+    choices(type, types.map(key => [key, titles[key]]), initial.type);
+    choices(mode, [['study', t('Estudio', 'Estudo')], ['exam', t('Examen', 'Prova')]], initial.mode);
+    const entries = values => values.map(value => [value, value]);
+    function refresh() {
+      const subjectsFor = values => Object.keys(values || {}).filter(key => values[key][type.value]);
+      choices(category, entries(Object.keys(catalog).filter(key => subjectsFor(catalog[key]).length)), category.value || initial.category);
+      choices(subject, entries(subjectsFor(catalog[category.value])), subject.value || initial.subject);
+      const topics = catalog[category.value]?.[subject.value]?.[type.value] || {};
+      choices(topic, [['', t('Todos los temas', 'Todos os temas')], ...entries(Object.keys(topics))], topic.value || initial.topic);
+      const pool = topic.value ? topics[topic.value] || [] : Object.values(topics).flat();
+      const filter = retry || (favorites.checked ? saved.favorites : null);
+      const available = filter ? pool.filter(id => filter.includes(id)).length : pool.length;
+      availability.textContent = available + (available === 1 ? t(' disponible con estos filtros.', ' disponível com estes filtros.') : t(' disponibles con estos filtros.', ' disponíveis com estes filtros.'));
+      submit.disabled = !available || starting;
+      const countText = type.value === 'case' ? 'Número de casos' : t('Número de preguntas', 'Número de questões');
+      countLabel.firstChild.textContent = countText + ' ';
+      count.setAttribute('aria-label', countText);
+      minutesLabel.hidden = minutes.disabled = mode.value !== 'exam';
+    }
+    form.append(label(t('Tipo de contenido', 'Tipo de conteúdo'), type), label(t('Categoría', 'Categoria'), category),
+      label(t('Materia', 'Disciplina'), subject), label(t('Tema específico', 'Tema específico'), topic), label(t('Modo', 'Modo'), mode),
+      countLabel, minutesLabel, label(t('Solo favoritas', 'Apenas favoritas'), favorites), submit);
+    configuration.replaceChildren(form, availability);
+    for (const input of [category, subject, topic, type, mode, favorites]) {
+      input.addEventListener('change', () => { retry = null; status.textContent = ''; refresh(); });
+    }
+    refresh();
+    configuration.hidden = false;
+    language.disabled = false;
+    form.addEventListener('submit', async event => {
       event.preventDefault();
-      finish.disabled = true;
-      const selected = items.map((_, index) => answers.get(index) ?? null);
-      let result;
-      if (practice) {
-        const correct = items.filter((item, index) => answers.get(index) === item.key).length;
-        result = { items, correct, omitted: items.length - answers.size, incorrect: answers.size - correct };
-      } else {
-        try {
-          result = await request('/finish', { token, answers: selected });
-        } catch (error) {
-          status.textContent = error.message;
-          finish.disabled = false;
+      if (current || starting) return;
+      const settings = {type: type.value, category: category.value, subject: subject.value, topic: topic.value, mode: mode.value};
+      const prior = saved.attempts.flatMap(record => record.items.map(item => item.id)).filter(Boolean);
+      const wanted = Number(count.value);
+      starting = true;
+      submit.disabled = language.disabled = true;
+      status.textContent = t('Preparando el quiz…', 'Preparando o quiz…');
+      try {
+        const data = await request('', {...settings, lang, count: wanted, minutes: Number(minutes.value),
+          seen: [...new Set(prior)].slice(0, 500), favorites: retry || (favorites.checked ? saved.favorites : null)});
+        if (!data.items.length) {
+          status.textContent = t('Solicitaste ', 'Você solicitou ') + wanted + t('. Disponibles: ', '. Disponíveis: ') + data.available;
+          if (data.available) {
+            availability.replaceChildren(button(t('Usar las disponibles', 'Usar as disponíveis'), () => {
+              count.value = String(data.available);
+              form.requestSubmit();
+            }));
+          }
           return;
         }
+        retry = null;
+        start(data, settings);
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        starting = false;
+        if (!current) {
+          language.disabled = false;
+          submit.disabled = false;
+        }
       }
-      const { correct, omitted, incorrect } = result;
-      saved.attempts.unshift({ date: Date.now(), subject: subject.value, correct,
-        items: result.items, answers: selected });
-      saved.attempts = saved.attempts.slice(0, 20);
-      save();
-      paintHistory();
-      output.replaceChildren(node('h3', correct + '/' + items.length + t(' respuestas correctas', ' respostas corretas')),
-        node('p', t('Correctas: ', 'Corretas: ') + correct + t(' · Incorrectas: ', ' · Incorretas: ') + incorrect + t(' · Omitidas: ', ' · Omitidas: ') + omitted));
-      result.items.forEach((item, index) => {
-        const details = node('details');
-        details.append(node('summary', item.stem), correction(item, answers.get(index)));
-        output.append(details);
-      });
     });
-    output.append(quiz);
+    paintHistory();
   }
 
-  async function request(path, body) {
-    const url = new URL(root.dataset.endpoint, location.href);
-    if (url.searchParams.has('rest_route')) {
-      url.searchParams.set('rest_route', url.searchParams.get('rest_route') + path);
-    } else {
-      url.pathname = url.pathname.replace(/\/$/, '') + path;
+  function paintHistory() {
+    history.replaceChildren(make('h3', t('Historial y revisión', 'Histórico e revisão')));
+    const records = saved.attempts.filter(record => (record.lang || record.items[0]?.lang || 'es') === lang);
+    if (!records.length) {
+      history.append(make('p', t('Todavía no hay intentos.', 'Ainda não há sessões.')));
+      return;
     }
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': root.dataset.nonce },
-      body: JSON.stringify(body)
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message);
-    return data;
+    const groups = new Map();
+    const weakTopics = new Map();
+    for (const record of records) {
+      const aggregate = groups.get(record.subject) || {total: 0, correct: 0, latest: record};
+      aggregate.total += record.items.length;
+      aggregate.correct += record.correct;
+      groups.set(record.subject, aggregate);
+      if (!record.category) continue;
+      for (const [index, item] of record.items.entries()) {
+        const topic = item.topic || record.topic;
+        if (!topic || record.answers[index] == null) continue;
+        const id = JSON.stringify([record.category, record.subject, record.type, topic]);
+        const stats = weakTopics.get(id) || {topic, record, correct: 0, total: 0};
+        stats.total++;
+        if (record.answers[index] === item.key) stats.correct++;
+        weakTopics.set(id, stats);
+      }
+    }
+    const progress = make('ul');
+    for (const [subject, data] of [...groups].sort((a, b) => a[1].correct / a[1].total - b[1].correct / b[1].total)) {
+      const row = make('li', subject + ' · ' + Math.round(100 * data.correct / data.total) + '% ');
+      if (data.correct < data.total && data.latest.category) row.append(button(t('Repasar materia', 'Revisar disciplina'), () => reopen(data.latest, null, '')));
+      progress.append(row);
+    }
+    history.append(progress);
+    const weakest = [...weakTopics.values()].filter(stats => stats.correct < stats.total)
+      .sort((a, b) => a.correct / a.total - b.correct / b.total).slice(0, 3);
+    if (weakest.length) {
+      const topics = make('ul');
+      history.append(make('h4', t('Temas para repasar', 'Temas para revisar')), topics);
+      for (const stats of weakest) {
+        const row = make('li', stats.topic + ' ');
+        row.append(button(t('Repasar tema', 'Revisar tema'), () => reopen(stats.record, null, stats.topic)));
+        topics.append(row);
+      }
+    }
+    for (const record of records) {
+      const details = make('details');
+      details.append(make('summary', new Date(record.date).toLocaleDateString(lang) + ' · ' + record.subject + ' · ' + record.correct + '/' + record.items.length));
+      if (record.mode) {
+        details.append(make('p', [record.topic, typeLabels()[record.type],
+          record.mode === 'exam' ? t('Examen', 'Prova') : t('Estudio', 'Estudo'), record.duration + ' s'].filter(Boolean).join(' · ')));
+        const incorrect = record.items.filter((item, index) => record.answers[index] != null && record.answers[index] !== item.key);
+        const marked = record.items.filter((_, index) => (record.marked || []).includes(index));
+        for (const [items, wording] of [[incorrect, t('Rehacer incorrectas', 'Refazer incorretas')], [marked, t('Repasar marcadas', 'Revisar marcadas')]]) {
+          const ids = items.map(item => item.id).filter(Boolean);
+          if (ids.length) details.append(button(wording, () => reopen(record, ids)));
+        }
+      }
+      for (const [index, item] of record.items.entries()) details.append(make('p', item.stem), correction(item, record.answers[index]));
+      history.append(details);
+    }
   }
 
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
-    submit.disabled = true;
-    const practice = mode.value === 'study';
+  function reopen(record, ids, topic = record.topic) {
+    if (current) return;
+    retry = ids;
     output.replaceChildren();
-    status.textContent = t('Preparando el quiz…', 'Preparando o quiz…');
-    try {
-      const data = await request('', { lang: root.dataset.lang, category: category.value, subject: subject.value,
-        count: Number(count.value), type: type.value, topic: topic.value, mode: practice ? 'study' : 'exam',
-        favorites: favorites.checked ? saved.favorites : null, allow_ai: ai.checked });
-      status.textContent = data.items.length
-        ? data.items.length + t(' preguntas disponibles.', ' questões disponíveis.')
-        : t('Todavía no hay preguntas para esta combinación.', 'Ainda não há questões para esta combinação.');
-      if (data.items.length) render(data.items, practice, data.token);
-    } catch (error) {
-      status.textContent = error.message || t('No se pudo preparar el quiz.', 'Não foi possível preparar o quiz.');
-    } finally {
-      submit.disabled = subject.disabled;
+    showConfiguration({...record, topic, mode: 'study'});
+    configuration.scrollIntoView({block: 'nearest'});
+    if (ids) status.textContent = t('La sesión se limitará a las preguntas seleccionadas para revisión.', 'A sessão será limitada às questões selecionadas para revisão.');
+  }
+
+  function start(data, settings) {
+    const {items, token} = data;
+    const practice = settings.mode === 'study';
+    const started = Date.now();
+    const expires = performance.now() + (data.seconds || 0) * 1000;
+    const answers = items.map(() => null);
+    const marked = new Set();
+    let index = 0;
+    let pending = Promise.resolve();
+    let finishing = false;
+    let timer;
+    current = data;
+    configuration.hidden = history.hidden = true;
+    status.textContent = '';
+    const clock = make('p');
+    clock.setAttribute('role', 'timer');
+    const question = make('div');
+    const navigation = make('div');
+    navigation.className = 'actions quiz-navigation';
+    const finish = button(practice ? t('Guardar práctica', 'Salvar prática') : t('Entregar examen', 'Entregar prova'), complete);
+    finish.className = 'btn';
+    output.replaceChildren(clock, question, navigation, finish);
+
+    function paint(focus = false) {
+      const item = items[index];
+      const selected = answers[index];
+      const heading = make('h3', t('Pregunta ', 'Questão ') + (index + 1) + '/' + items.length);
+      heading.tabIndex = -1;
+      const fieldset = make('fieldset');
+      fieldset.className = 'options';
+      fieldset.append(make('legend', item.stem));
+      fieldset.disabled = (practice && selected != null) || finishing || (!practice && performance.now() >= expires);
+      item.options.forEach((option, value) => {
+        const input = make('input');
+        Object.assign(input, {type: 'radio', name: 'quiz-response', checked: value === selected});
+        input.addEventListener('change', () => {
+          answers[index] = value;
+          if (!practice) {
+            const snapshot = [...answers];
+            pending = pending.then(() => request('/answers', {token, answers: snapshot})).catch(() => {
+              status.textContent = t('No se pudo guardar una respuesta en el servidor.', 'Não foi possível salvar uma resposta no servidor.');
+            });
+          }
+          paint(practice);
+          if (!practice) question.querySelector('input:checked')?.focus();
+        });
+        fieldset.append(label(option, input));
+      });
+      const mark = button(marked.has(index) ? t('Quitar marca', 'Desmarcar') : t('Marcar para revisión', 'Marcar para revisão'), () => {
+        if (marked.has(index)) marked.delete(index);
+        else marked.add(index);
+        paint(true);
+      });
+      mark.setAttribute('aria-pressed', String(marked.has(index)));
+      const favorite = button(saved.favorites.includes(item.id) ? t('Quitar de favoritas', 'Remover dos favoritos') : t('Guardar como favorita', 'Salvar nos favoritos'), () => {
+        saved.favorites = saved.favorites.includes(item.id) ? saved.favorites.filter(id => id !== item.id) : [...saved.favorites, item.id].slice(-500);
+        persist();
+        paint(true);
+      });
+      question.replaceChildren(heading);
+      if (settings.type === 'case' || item.origin === 'sample') question.append(make('p', settings.type === 'case'
+        ? t('Caso ficticio para estudio', 'Caso fictício para estudo') : t('Muestra educativa de EstudiaMed', 'Amostra educativa da EstudiaMed')));
+      if (item.difficulty) {
+        const labels = {beginner: t('Inicial', 'Inicial'), intermediate: t('Intermedio', 'Intermediário'),
+          advanced: t('Avanzado', 'Avançado'), exam: t('Examen universitario', 'Prova universitária')};
+        if (labels[item.difficulty]) question.append(make('p', labels[item.difficulty]));
+      }
+      question.append(fieldset, mark, favorite);
+      if (practice && selected != null) question.append(correction(item, selected));
+      navigation.replaceChildren(make('p', answers.filter(answer => answer != null).length + '/' + items.length + t(' respondidas', ' respondidas')));
+      const add = target => {
+        const nav = button(String(target + 1) + (marked.has(target) ? ' ★' : '') + (answers[target] != null ? ' ✓' : ''), () => {
+          index = target;
+          paint(true);
+        });
+        nav.setAttribute('aria-label', t('Pregunta ', 'Questão ') + (target + 1) + (answers[target] != null ? t(', respondida', ', respondida') : t(', sin responder', ', sem resposta')) + (marked.has(target) ? t(', marcada', ', marcada') : ''));
+        if (index === target) nav.setAttribute('aria-current', 'step');
+        navigation.append(nav);
+      };
+      if (!practice) items.forEach((_, target) => add(target));
+      else for (const target of [index - 1, index + 1]) if (target >= 0 && target < items.length) add(target);
+      if (focus) heading.focus();
     }
-  });
+
+    async function complete() {
+      if (finishing) return;
+      finishing = finish.disabled = true;
+      paint();
+      try {
+        await pending;
+        const correct = practice ? items.filter((item, i) => item.key === answers[i]).length : 0;
+        const omitted = answers.filter(answer => answer == null).length;
+        const result = practice ? {items, answers, correct, omitted, incorrect: items.length - correct - omitted}
+          : await request('/finish', {token, answers});
+        clearInterval(timer);
+        current = null;
+        saved.attempts.unshift({...settings, lang, date: Date.now(), duration: Math.round((Date.now() - started) / 1000),
+          items: result.items, answers: result.answers, marked: [...marked], correct: result.correct});
+        saved.attempts = saved.attempts.slice(0, Math.max(20, saved.attempts.length - 1));
+        persist();
+        const resultHeading = make('h3', t('Resultado: ', 'Resultado: ') + Math.round(100 * result.correct / items.length) + '%');
+        resultHeading.tabIndex = -1;
+        const score = [
+          [result.correct, t('correcta', 'correta'), t('correctas', 'corretas')],
+          [result.incorrect, t('incorrecta', 'incorreta'), t('incorrectas', 'incorretas')],
+          [result.omitted, 'omitida', 'omitidas']
+        ].map(([total, single, plural]) => total + ' ' + (total === 1 ? single : plural));
+        output.replaceChildren(resultHeading, make('p', score.join(', ') + '.'));
+        result.items.forEach((item, i) => {
+          const details = make('details');
+          details.append(make('summary', item.stem), correction(item, result.answers[i]));
+          output.append(details);
+        });
+        history.hidden = false;
+        status.textContent = '';
+        showConfiguration(settings);
+        resultHeading.focus();
+      } catch (error) {
+        status.textContent = error.message;
+        finishing = finish.disabled = false;
+        paint();
+      }
+    }
+
+    function tick() {
+      const seconds = Math.max(0, Math.ceil((expires - performance.now()) / 1000));
+      clock.textContent = t('Tiempo restante ', 'Tempo restante ') + Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+      if (!seconds) {
+        clearInterval(timer);
+        complete();
+      }
+    }
+    paint(true);
+    clock.hidden = practice;
+    if (!practice) {
+      timer = setInterval(tick, 200);
+      tick();
+    }
+  }
+
+  showConfiguration();
 }

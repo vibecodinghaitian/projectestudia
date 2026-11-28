@@ -25,9 +25,16 @@ function estudiamed_ehep_editor( $post ) {
 	wp_nonce_field( 'estudia_ehep_edit', 'estudia_ehep_nonce' );
 	$module = get_post_meta( $post->ID, '_estudia_question_module', true ) ?: 'ehep';
 	echo '<p><label>Módulo <select name="estudia_question_module"><option value="ehep"' . selected( $module, 'ehep', false ) . '>EHEP</option><option value="general"' . selected( $module, 'general', false ) . '>Quiz General</option></select></label></p>';
-	foreach ( array( 'call' => 'Convocatoria', 'category' => 'Categoría de Quiz General', 'type' => 'Tipo (mcq o case)', 'original' => 'ID original EHEP para corregir (p. ej. html-4)' ) as $field => $label ) {
+	foreach ( array( 'call' => 'Convocatoria', 'category' => 'Categoría de Quiz General', 'type' => 'Tipo (mcq, case, reasoning, basic o application)', 'original' => 'ID original EHEP para corregir (p. ej. html-4)' ) as $field => $label ) {
 		echo '<p><label>' . esc_html( $label ) . ' <input name="ehep_' . esc_attr( $field ) . '" value="' . esc_attr( $item[ $field ] ?? '' ) . '"></label></p>';
 	}
+	echo '<p><label>Idioma de Quiz General <select name="ehep_lang"><option value="es">Español</option><option value="pt"' .
+		selected( $item['lang'] ?? '', 'pt', false ) . '>Português</option></select></label></p>';
+	echo '<p><label>Dificultad de Quiz General <select name="ehep_difficulty"><option value="">Sin nivel asignado</option>';
+	foreach ( array( 'beginner' => 'Inicial', 'intermediate' => 'Intermedio', 'advanced' => 'Avanzado', 'exam' => 'Examen universitario' ) as $value => $label ) {
+		echo '<option value="' . esc_attr( $value ) . '"' . selected( $item['difficulty'] ?? '', $value, false ) . '>' . esc_html( $label ) . '</option>';
+	}
+	echo '</select></label></p><p><label>URL de la referencia <input name="ehep_url" type="url" value="' . esc_attr( $item['url'] ?? '' ) . '"></label></p>';
 	echo '<p><label>Explicación general <textarea class="large-text" name="ehep_explanation" rows="3">' . esc_textarea( $item['explanation'] ?? '' ) . '</textarea></label></p>';
 	echo '<p><label><input type="checkbox" name="ehep_archived" value="1" ' . checked( ! empty( $item['archived'] ), true, false ) . '> Archivar para intentos futuros</label></p>';
 	echo '<p><label for="ehep_subject">Especialidad</label><br><input class="regular-text" id="ehep_subject" name="ehep_subject" value="' . esc_attr( $item['subject'] ?? '' ) . '"></p>';
@@ -76,6 +83,14 @@ function estudiamed_ehep_save_item( $id ) {
 		$item[ $field ] = sanitize_textarea_field( wp_unslash( $_POST[ 'ehep_' . $field ] ?? '' ) );
 	}
 	$item['archived'] = isset( $_POST['ehep_archived'] );
+	if ( 'general' === ( $_POST['estudia_question_module'] ?? '' ) ) {
+		$item['lang'] = 'pt' === ( $_POST['ehep_lang'] ?? '' ) ? 'pt' : 'es';
+		$difficulty = sanitize_key( $_POST['ehep_difficulty'] ?? '' );
+		$item['difficulty'] = in_array( $difficulty, array( 'beginner', 'intermediate', 'advanced', 'exam' ), true ) ? $difficulty : '';
+	}
+	if ( isset( $_POST['ehep_url'] ) && is_string( $_POST['ehep_url'] ) ) {
+		$item['url'] = esc_url_raw( wp_unslash( $_POST['ehep_url'] ), array( 'https', 'http' ) );
+	}
 	update_post_meta( $id, '_estudia_question_module', 'general' === ( $_POST['estudia_question_module'] ?? '' ) ? 'general' : 'ehep' );
 	update_post_meta( $id, '_estudia_ehep', wp_slash( $item ) );
 }
@@ -123,8 +138,8 @@ function estudiamed_ehep_bank() {
 add_filter( 'estudia_quiz_editorial_items', static function ( $bank ) {
 	foreach ( estudiamed_ehep_editorial_items( 'general' ) as $item ) {
 		if ( empty( $item['archived'] ) && ! empty( $item['explanation'] ) &&
-			in_array( $item['subject'], estudia_quiz_catalog( 'es' )[ $item['category'] ?? '' ] ?? array(), true ) &&
-			in_array( $item['type'] ?? '', array( 'case', 'mcq' ), true ) ) {
+			in_array( $item['subject'], estudia_quiz_catalog( $item['lang'] ?? 'es' )[ $item['category'] ?? '' ] ?? array(), true ) &&
+			in_array( $item['type'] ?? '', ( function_exists( 'estudia_quiz_types' ) ? estudia_quiz_types() : array( 'mcq', 'case' ) ), true ) ) {
 			$bank[] = $item + array( 'lang' => 'es', 'origin' => 'bank' );
 		}
 	}

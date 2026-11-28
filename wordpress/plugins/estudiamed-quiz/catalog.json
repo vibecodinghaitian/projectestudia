@@ -24,7 +24,9 @@
       "Parasitología",
       "Semiología Clínica",
       "Fisiopatología I",
-      "Inmunología"
+      "Inmunología",
+      "Anatomía II",
+      "Fisiología II"
     ],
     "CIENCIAS CLÍNICAS Y QUIRÚRGICAS": [
       "Cardiología",
@@ -124,6 +126,11 @@
       "Salud Pública (Chile)",
       "Psiquiatría (Chile)",
       "Especialidades Quirúrgicas (Chile)"
+    ],
+    "SALUD PÚBLICA": [
+      "Bioestadística",
+      "Epidemiología",
+      "Medicina Preventiva"
     ]
   },
   "pt": {

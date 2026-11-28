@@ -46,7 +46,7 @@ function estudia_ehep_import_screen() {
 
 function estudia_ehep_columns() {
 	return array( 'stem', 'subject', 'topic', 'source', 'call', 'category', 'type', 'key', 'option_a', 'option_b', 'option_c', 'option_d',
-		'explanation', 'reason_a', 'reason_b', 'reason_c', 'reason_d' );
+		'explanation', 'reason_a', 'reason_b', 'reason_c', 'reason_d', 'lang', 'difficulty', 'url' );
 }
 
 add_action( 'admin_post_estudia_ehep_template', static function () {
@@ -73,9 +73,14 @@ function estudia_ehep_import_normalize( $raw, $module ) {
 	}
 	if ( ! $item['stem'] || ! $item['subject'] || ! $item['source'] || false === $item['key'] ||
 		count( array_unique( array_filter( $item['options'] ) ) ) !== 4 || ! $item['explanation'] || count( array_filter( $item['reasons'] ) ) !== 4 ) return null;
-	if ( 'general' === $module && ( ! function_exists( 'estudia_quiz_catalog' ) ||
-		! in_array( $item['subject'], estudia_quiz_catalog( 'es' )[ $item['category'] ] ?? array(), true ) ||
-		! in_array( $item['type'], array( 'mcq', 'case' ), true ) ) ) return null;
+	if ( 'general' === $module ) {
+		$item['lang'] = 'pt' === ( $raw['lang'] ?? '' ) ? 'pt' : 'es';
+		$item['difficulty'] = in_array( $raw['difficulty'] ?? '', array( 'beginner', 'intermediate', 'advanced', 'exam' ), true ) ? $raw['difficulty'] : '';
+		$item['url'] = esc_url_raw( is_string( $raw['url'] ?? null ) ? $raw['url'] : '', array( 'https', 'http' ) );
+		if ( ! function_exists( 'estudia_quiz_catalog' ) || ! $item['topic'] ||
+			! in_array( $item['subject'], estudia_quiz_catalog( $item['lang'] )[ $item['category'] ] ?? array(), true ) ||
+			! in_array( $item['type'], function_exists( 'estudia_quiz_types' ) ? estudia_quiz_types() : array( 'mcq', 'case' ), true ) ) return null;
+	}
 	return $item;
 }
 
