@@ -1,0 +1,218 @@
+{
+  "es": {
+    "PREMÉDICA": [
+      "Biología I",
+      "Química Inorgánica I",
+      "Biofísica",
+      "Química Orgánica I",
+      "Fundamentos de Anatomía",
+      "Fundamentos de Fisiología",
+      "Biología Celular y Molecular"
+    ],
+    "CIENCIAS BÁSICAS": [
+      "Anatomía I",
+      "Bioquímica I",
+      "Embriología",
+      "Fisiología I",
+      "Histología",
+      "Microbiología Médica",
+      "Patología I",
+      "Neuroanatomía",
+      "Genética",
+      "Farmacología",
+      "Epidemiología",
+      "Parasitología",
+      "Semiología Clínica",
+      "Fisiopatología I",
+      "Inmunología",
+      "Anatomía II",
+      "Fisiología II"
+    ],
+    "CIENCIAS CLÍNICAS Y QUIRÚRGICAS": [
+      "Cardiología",
+      "Endocrinología",
+      "Hematología",
+      "Neurología",
+      "Reumatología",
+      "Cirugía",
+      "Oftalmología",
+      "Nefrología",
+      "Infectología",
+      "Psiquiatría",
+      "Dermatología",
+      "Anestesiología",
+      "Oncología",
+      "Neumología",
+      "Gastroenterología",
+      "Ginecología y Obstetricia",
+      "Cuidados Intensivos",
+      "Ortopedia",
+      "Otorrinolaringología",
+      "Neurocirugía",
+      "Urología",
+      "Pediatría",
+      "Geriatría",
+      "Medicina Familiar"
+    ],
+    "INTERNADO ROTATORIO": [
+      "Cirugía General",
+      "Medicina Comunitaria",
+      "Medicina Interna",
+      "Ginecología y Obstetricia",
+      "Pediatría"
+    ],
+    "Temas Generales": [
+      "Anatomía",
+      "Neumología",
+      "Medicina Interna",
+      "Cirugía",
+      "Pediatría",
+      "Ginecología y Obstetricia",
+      "Psiquiatría y Neurología",
+      "Endocrinología",
+      "Gastroenterología",
+      "Hematología",
+      "Nefrología",
+      "Neurología",
+      "Oncología",
+      "Oftalmología",
+      "Ortopedia",
+      "Otorrinolaringología",
+      "Psiquiatría",
+      "Radiología",
+      "Urología"
+    ],
+    "ENARM (México)": [
+      "Medicina Interna (ENARM)",
+      "Pediatría (ENARM)",
+      "Ginecología y Obstetricia (ENARM)",
+      "Cirugía General (ENARM)",
+      "Salud Pública (ENARM)",
+      "Urgencias (ENARM)"
+    ],
+    "MIR (España)": [
+      "Cardiología (MIR)",
+      "Neumología (MIR)",
+      "Digestivo (MIR)",
+      "Endocrinología (MIR)",
+      "Nefrología (MIR)",
+      "Infecciosas (MIR)",
+      "Pediatría (MIR)",
+      "Ginecología y Obstetricia (MIR)",
+      "Psiquiatría (MIR)",
+      "Estadística y Epidemiología (MIR)"
+    ],
+    "Residência (Brasil)": [
+      "Clínica Médica (Brasil)",
+      "Pediatria (Brasil)",
+      "Ginecologia e Obstetrícia (Brasil)",
+      "Cirurgia Geral (Brasil)",
+      "Saúde Coletiva (Brasil)",
+      "Medicina Preventiva e Social (Brasil)"
+    ],
+    "Residencia (Rep. Dom.)": [
+      "Medicina Interna (RD)",
+      "Pediatría (RD)",
+      "Ginecología y Obstetricia (RD)",
+      "Cirugía (RD)",
+      "Salud Pública y Epidemiología (RD)",
+      "Ciencias Básicas Aplicadas (RD)"
+    ],
+    "Residencia (Chile)": [
+      "Medicina Interna (Chile)",
+      "Pediatría (Chile)",
+      "Ginecología y Obstetricia (Chile)",
+      "Cirugía (Chile)",
+      "Salud Pública (Chile)",
+      "Psiquiatría (Chile)",
+      "Especialidades Quirúrgicas (Chile)"
+    ],
+    "SALUD PÚBLICA": [
+      "Bioestadística",
+      "Epidemiología",
+      "Medicina Preventiva"
+    ]
+  },
+  "pt": {
+    "Pré-médico": [
+      "Biologia",
+      "Química",
+      "Anatomia",
+      "Fisiologia"
+    ],
+    "Ciências Básicas": [
+      "Anatomia",
+      "Fisiologia",
+      "Histologia",
+      "Bioquímica",
+      "Embriologia",
+      "Microbiologia",
+      "Parasitologia",
+      "Genética",
+      "Imunologia",
+      "Farmacologia",
+      "Epidemiologia",
+      "Patologia"
+    ],
+    "Ciências Clínicas": [
+      "Clínica Médica",
+      "Pediatria",
+      "Ginecologia",
+      "Cirurgia",
+      "Psiquiatria",
+      "Emergências",
+      "Dermatologia",
+      "Neurologia",
+      "Cardiologia"
+    ],
+    "Internato": [
+      "Cirurgia",
+      "Clínica Médica",
+      "Gineco-Obstetrícia",
+      "Pediatria"
+    ],
+    "Tópicos Gerais": [
+      "Anatomía",
+      "Neumología",
+      "Medicina Interna",
+      "Cirugía",
+      "Pediatría",
+      "Ginecología y Obstetricia",
+      "Psiquiatría y Neurología"
+    ],
+    "ENARM (México)": [
+      "Clínica Médica (ENARM)",
+      "Pediatria (ENARM)",
+      "Gineco (ENARM)",
+      "Cirurgia (ENARM)"
+    ],
+    "MIR (Espanha)": [
+      "Cardiologia (MIR)",
+      "Pneumologia (MIR)",
+      "Gastro (MIR)",
+      "Endocrino (MIR)",
+      "Nefro (MIR)",
+      "Pediatria (MIR)",
+      "Gineco (MIR)"
+    ],
+    "Residência (Brasil)": [
+      "Clínica Médica (Brasil)",
+      "Pediatria (Brasil)",
+      "Gineco (Brasil)",
+      "Cirurgia (Brasil)",
+      "Saúde Coletiva (Brasil)"
+    ],
+    "Residência (Rep. Dom.)": [
+      "Clínica Médica (RD)",
+      "Pediatria (RD)",
+      "Gineco (RD)",
+      "Cirurgia (RD)"
+    ],
+    "Residência (Chile)": [
+      "Clínica Médica (Chile)",
+      "Pediatria (Chile)",
+      "Gineco (Chile)",
+      "Cirurgia (Chile)"
+    ]
+  }
+}

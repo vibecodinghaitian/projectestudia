@@ -1,0 +1,57 @@
+EstudiaMed · Revisión de bancos MIR y Revalida · 28 de noviembre de 2026
+
+Se recuperaron el ZIP previo y el commit b696778. Se reutilizó el importador
+existente, con MedExpQA 78b57699763e00e38acd550f28de24d8a65f1643 y MedBench
+8d71e2b0086d83c15115d8f1328c519c9b8aac2b. La copia DrBodeBench conserva
+SHA-256 7f1960c28f8ccfd40589cb7cfcfb3c9ee21d0982829a4de447272725761ee289.
+
+MIR · 622 analizadas, 0 listas, 0 importadas, 549 pendientes y 73 excluidas.
+El recuento reproduce 71 duplicados internos, un ítem dependiente de imagen y
+un registro inválido. Se compararon los 80 registros etiquetados 2022 con
+cuadernillo y hoja del portal FSE. La edición correspondiente es la
+convocatoria 2021, versión 0. Hubo 66 coincidencias exactas tras normalizar
+espacios, puntuación y cortes de línea. En esas 66, 64 claves coincidieron,
+una discrepó y una carecía de clave válida. Las otras 14 requieren cotejo
+manual. Algunas incidencias coinciden con registros ya excluidos. El conjunto
+de 80 incluye duplicados, por lo que estos recuentos se refieren a registros.
+El registro 544 tiene clave coincidente y comentarios completos, pero la
+afirmación sobre las indicaciones de omalizumab necesita corrección editorial.
+
+Revalida · 500 analizadas, 0 listas, 0 importadas, 425 pendientes y 75
+excluidas. Se reprodujeron 227 coincidencias por enunciado normalizado con
+DrBodeBench. El cotejo de gabaritos definitivos dio 95 coincidencias y cinco
+anuladas en 2024/1, y 94 coincidencias y seis anuladas en 2024/2. Es un
+cotejo por número de clave. El cotejo textual se hizo sobre la muestra
+anotada y no sobre los 200 enunciados. Se redactaron comentarios originales
+por opción para 2024/1 preguntas 1 y 2. Ambos siguen pendientes de revisión
+editorial y derechos. La pregunta 1 además mantiene una diferencia de
+transcripción. Para 2025/1, 2025/2 y 2026/1 se localizaron los enlaces
+oficiales, pero no se obtuvo una copia verificable de las claves en esta
+ejecución. En 2025/2 y 2026/1 aún hay que resolver la versión del caderno.
+
+Derechos. MedExpQA declara CC BY 4.0 para el dataset. El aviso legal de
+Sanidad permite la reutilización del material cubierto por sus condiciones,
+sujeto a excepciones y derechos de terceros. Se mantiene pendiente la
+validación por componente. MedBench declara Apache 2.0 en su repositorio.
+La disponibilidad pública de los cuadernillos de Inep no acreditó por sí
+sola una licencia para republicar sus enunciados y opciones en EstudiaMed.
+
+Entornos. Novamira confirmó que la conexión administradora apunta a
+producción. La consulta de solo lectura devolvió 1.206 preguntas EHEP.
+El ensayo del importador y del navegador usó el WordPress local de desarrollo
+con datos ficticios. Pasaron filtros de idioma, año y especialidad, simulacros
+de cuatro y cinco opciones, corrección e historial tras recargar. El banco
+real no produjo registros READY. wordpress-ready.json es una lista vacía.
+No se crearon borradores reales ni se realizaron escrituras en producción.
+
+Fuentes principales
+https://huggingface.co/datasets/HiTZ/MedExpQA
+https://github.com/Precisa-Saude/medbench-brasil
+https://huggingface.co/datasets/recogna-nlp/drbodebench
+https://fse.sanidad.gob.es/fseweb/#/principal/datosAnteriores/cuadernosExamen
+https://www.sanidad.gob.es/avisoLegal/
+https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/revalida/provas-e-gabaritos
+https://www.ema.europa.eu/en/medicines/human/EPAR/xolair
+
+Los enlaces exactos de cuadernillos y claves están en fuentes-oficiales.tsv
+y por registro en revision-consolidada.json.

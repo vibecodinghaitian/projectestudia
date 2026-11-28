@@ -1,0 +1,8 @@
+examen	edicion	version	cuadernillo	clave
+MIR	2021 (examen 2022)	0	https://fse.sanidad.gob.es/hera/api/datos/convocatoria/getDatosCuadernosExamen?titulacion=M&anyo=2021&version=0&opcionSelect=C	https://fse.sanidad.gob.es/hera/api/datos/convocatoria/getHojaRespuestas?titulacion=M&anyo=2021&version=0
+MIR	2022 (examen 2023)	0	https://fse.sanidad.gob.es/hera/api/datos/convocatoria/getDatosCuadernosExamen?titulacion=M&anyo=2022&version=0&opcionSelect=C	https://fse.sanidad.gob.es/hera/api/datos/convocatoria/getHojaRespuestas?titulacion=M&anyo=2022&version=0
+Revalida	2024/1	regular	https://download.inep.gov.br/revalida/provas_e_gabaritos/2024_1_PV_objetiva_regular.pdf	https://download.inep.gov.br/revalida/provas_e_gabaritos/2024_1_GB_objetiva.pdf
+Revalida	2024/2	regular	https://download.inep.gov.br/revalida/provas_e_gabaritos/2024_2_PV_objetiva_regular.pdf	https://download.inep.gov.br/revalida/provas_e_gabaritos/2024_2_GB_objetiva.pdf
+Revalida	2025/1	regular	https://download.inep.gov.br/revalida/provas_e_gabaritos/2025_1_PV_objetiva_regular.pdf	https://download.inep.gov.br/revalida/provas_e_gabaritos/2025_1_GB_objetiva_definitivo.pdf
+Revalida	2025/2	caderno 1, pendiente de identificación	https://download.inep.gov.br/revalida/provas_e_gabaritos/2025_2_caderno_1_preliminar.pdf	https://download.inep.gov.br/revalida/provas_e_gabaritos/2025_2_gabarito_caderno_1.pdf
+Revalida	2026/1	caderno 1, pendiente de identificación	https://download.inep.gov.br/revalida/provas_e_gabaritos/2026_1_caderno_1_.pdf	https://download.inep.gov.br/revalida/provas_e_gabaritos/2026_1_gabarito_definitivo_caderno1.pdf

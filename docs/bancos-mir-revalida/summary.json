@@ -1,0 +1,36 @@
+{
+  "MIR": {
+    "READY": 0,
+    "NEEDS_REVIEW": 549,
+    "EXCLUDED": 73,
+    "exported": 0,
+    "issues": {
+      "explanation_missing": 400,
+      "official_key_unverified": 503,
+      "editorial_review_pending": 549,
+      "rights_unverified": 549,
+      "official_id_ambiguous": 51,
+      "transcription_discrepancy": 13,
+      "duplicate_in_batch": 71,
+      "media_required": 1,
+      "official_key_mismatch": 1,
+      "invalid_question": 1
+    }
+  },
+  "Revalida": {
+    "READY": 0,
+    "NEEDS_REVIEW": 425,
+    "EXCLUDED": 75,
+    "exported": 0,
+    "issues": {
+      "transcription_discrepancy": 1,
+      "editorial_review_pending": 425,
+      "rights_unverified": 425,
+      "drbode_exact_stem_overlap": 227,
+      "explanation_missing": 423,
+      "annulled": 21,
+      "media_required": 56,
+      "official_key_unverified": 251
+    }
+  }
+}

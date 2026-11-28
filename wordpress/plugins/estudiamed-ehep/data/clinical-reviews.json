@@ -1,0 +1,59 @@
+{
+  "1": {
+    "estado": "Verificada",
+    "explicacion": "La progresión de hipervigilancia a letargo y luego a estupor o coma corresponde al aumento de la gravedad de la encefalopatía neonatal. La succión se debilita en el cuadro moderado y puede estar ausente en el grave, lo que apoya la secuencia del banco.",
+    "distractor": "La combinación que asigna estupor al estadio moderado invierte dos grados de compromiso neurológico.",
+    "fuente": "Canadian Paediatric Society · Hypothermia for newborns with hypoxic-ischemic encephalopathy",
+    "url": "https://cps.ca/en/documents/position/hypothermia-for-newborns"
+  },
+  "2": {
+    "estado": "Verificada",
+    "explicacion": "El dolor cólico, los vómitos, la distensión y la ausencia de heces y gases orientan a una obstrucción intestinal. La cirugía abdominal previa apoya una causa adherencial y los ruidos inicialmente acelerados favorecen una obstrucción mecánica.",
+    "distractor": "El íleo paralítico también produce distensión y falta de tránsito, pero el dolor cólico y los ruidos acelerados favorecen la oclusión mecánica.",
+    "fuente": "World Society of Emergency Surgery · Guías de Bolonia para obstrucción adherencial",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/29946347/"
+  },
+  "3": {
+    "estado": "Verificada",
+    "explicacion": "La estreptomicina es un aminoglucósido que se ha utilizado en combinación con otros antituberculosos. La pregunta evalúa su clase farmacológica y no la selección de un esquema actual.",
+    "distractor": "La rifampicina también es un antituberculoso, pero pertenece a las rifamicinas.",
+    "fuente": "NIH LiverTox · Streptomycin",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK548821/?report=classic"
+  },
+  "4": {
+    "estado": "Discrepa con la guía",
+    "segunGuia": "«El tratamiento de elección es la ciprofloxacina» tampoco es válida como afirmación general. La selección depende de la susceptibilidad y del contexto epidemiológico.",
+    "explicacion": "El banco marca como falsa la afirmación sobre la frecuencia de leucocitosis. El CDC también invalida una lectura universal de la opción sobre ciprofloxacina: la resistencia es frecuente y la elección empírica depende del contexto. Por eso la pregunta admite otra objeción según la guía.",
+    "distractor": "La ciprofloxacina puede ser adecuada para una cepa susceptible. Sin ese dato, presentarla como tratamiento de elección general resulta impreciso.",
+    "fuente": "CDC Yellow Book · Typhoid and Paratyphoid Fever",
+    "url": "https://www.cdc.gov/yellow-book/hcp/travel-associated-infections-diseases/typhoid-and-paratyphoid-fever.html"
+  },
+  "5": {
+    "estado": "Verificada",
+    "explicacion": "Entre las opciones, arteméter con lumefantrina es el tratamiento respaldado para el paludismo no complicado por P. falciparum durante el embarazo. La OMS incluye esta combinación como opción preferida en el primer trimestre. Si hubiera criterios de gravedad, correspondería otro manejo.",
+    "distractor": "La primaquina no sustituye este esquema y se evita durante el embarazo.",
+    "fuente": "OMS · Seguridad de los antipalúdicos en el primer trimestre",
+    "url": "https://www.who.int/publications/i/item/9789240069404"
+  },
+  "6": {
+    "estado": "Verificada",
+    "explicacion": "La azitromicina tiene actividad clínica contra C. trachomatis y figura como alternativa en la guía del CDC. La pregunta solicita un macrólido con actividad, mientras que la pauta preferida para muchas infecciones no complicadas en adultos no gestantes es doxiciclina.",
+    "distractor": "La eritromicina es un macrólido, pero el CDC ya no la recomienda por sus efectos gastrointestinales y el riesgo de baja adherencia.",
+    "fuente": "CDC · Chlamydial Infections, STI Treatment Guidelines",
+    "url": "https://www.cdc.gov/std/treatment-guidelines/chlamydia.htm"
+  },
+  "7": {
+    "estado": "Ambigua",
+    "explicacion": "El inicio después de las primeras 24 horas y el buen estado general son compatibles con ictericia fisiológica. A los tres a cinco días también puede aparecer hiperbilirrubinemia por ingesta insuficiente. La inspección visual por sí sola no permite distinguirlas.",
+    "distractor": "La ictericia por leche materna suele persistir con ingesta y ganancia de peso adecuadas. Para sostenerla aquí faltan la evolución del peso, datos de ingesta y una medición de bilirrubina.",
+    "fuente": "American Academy of Pediatrics · Guía de hiperbilirrubinemia neonatal",
+    "url": "https://publications.aap.org/pediatrics/article/150/3/e2022058859/188074"
+  },
+  "971": {
+    "estado": "Verificada",
+    "explicacion": "El agente de la escarlatina es Streptococcus pyogenes, estreptococo del grupo A. El caso indica 32 kg, por encima del umbral de 27 kg que usa el CDC para la dosis única intramuscular de 1.200.000 unidades de penicilina G benzatínica.",
+    "distractor": "Las dos opciones de 600.000 unidades son idénticas y corresponden a la pauta del CDC para un peso inferior a 27 kg.",
+    "fuente": "CDC · Clinical Guidance for Scarlet Fever",
+    "url": "https://www.cdc.gov/group-a-strep/hcp/clinical-guidance/scarlet-fever.html"
+  }
+}
