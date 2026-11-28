@@ -23,3 +23,21 @@ Se consultaron los pénsum de Medicina de UTESA con vigencia enero de 2013 (Of. 
 ### Verificación local
 
 Activa EstudiaMed Campus, EHEP y Quiz General junto al tema EstudiaMed en una instalación de pruebas. Crea dos cuentas de estudiante locales, abre `/#quiz-general` y completa una práctica y un simulacro. Verifica que el simulacro solo revele la corrección al entregar y que el token no sea accesible desde otra cuenta. Revisa el historial al recargar y cambia a portugués para comprobar el caso traducido.
+
+## Bancos externos MIR y Revalida
+
+`tools/prepare_exam_banks.py` lee las tres particiones españolas JSONL de MedExpQA y los JSON del directorio `packages/dataset/data/revalida` de MedBench. Usa Python 3.9 o superior. Pin de MedExpQA: `78b57699763e00e38acd550f28de24d8a65f1643`. Pin de MedBench: `8d71e2b0086d83c15115d8f1328c519c9b8aac2b`. Para reproducir la detección de coincidencias, usa `questoes-Revalida+Fuvest.json` de DrBodeBench con SHA-256 `7f1960c28f8ccfd40589cb7cfcfb3c9ee21d0982829a4de447272725761ee289`.
+
+```sh
+python tools/prepare_exam_banks.py \
+  --mir /ruta/MedExpQA/data/es --mir-revision 78b57699763e00e38acd550f28de24d8a65f1643 \
+  --revalida /ruta/medbench-brasil/packages/dataset/data/revalida \
+  --revalida-revision 8d71e2b0086d83c15115d8f1328c519c9b8aac2b \
+  --drbode /ruta/drbode.json --reviews /ruta/revisiones.json --output /ruta/salida
+```
+
+El archivo de revisión se indexa por `source_id`, visible en `validation.json`. Para cada ítem revisado registra la letra `official_key`, la URL específica `official_key_url`, la versión de cuadernillo `official_version` cuando el identificador sea ambiguo, y evidencia separada en `rights` por `stem`, `options`, `key`, `explanation` e `images`. Cada entrada de derechos requiere `license` y la URL `evidence`. Usa `booklet_url` para el enlace del cuadernillo original. La marca `editorial_reviewed` indica que se cotejaron enunciado, alternativas y explicaciones. Para Revalida, un comentario editorial aportado explícitamente requiere `explanation_source`, `explanation` y `reasons`. Una discrepancia de transcripción registrada bloquea la salida del ítem.
+
+`summary.json` contiene los recuentos. `validation.json` contiene trazabilidad por registro, sin enunciados ni alternativas. `wordpress-ready.json` incluye hasta 15 registros listos por examen de forma predeterminada. En un WordPress de desarrollo respaldado, carga ese JSON en **Preguntas EHEP → Importar CSV/JSON** con el módulo **Quiz General**. Previsualiza y guarda en borrador. La reimportación comprueba el identificador de fuente y el enunciado. Publica en desarrollo solo los borradores autorizados que desees probar. Los filtros de examen, especialidad y año se habilitan según el contenido publicado en el idioma activo. Las sesiones reutilizan el flujo actual de corrección, simulacro e historial local.
+
+Fuentes: [MedExpQA](https://huggingface.co/datasets/HiTZ/MedExpQA), [MedBench](https://github.com/Precisa-Saude/medbench-brasil), [DrBodeBench](https://huggingface.co/datasets/recogna-nlp/drbodebench), [provas e gabaritos del Inep](https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/revalida/provas-e-gabaritos).

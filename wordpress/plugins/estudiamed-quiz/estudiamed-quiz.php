@@ -68,6 +68,14 @@ function estudia_quiz_topics( $lang ) {
 	return $topics;
 }
 
+function estudia_quiz_years() {
+	$years = array();
+	foreach ( estudia_quiz_bank() as $item ) {
+		if ( isset( $item['year'] ) ) $years[ $item['id'] ] = $item['year'];
+	}
+	return $years;
+}
+
 function estudia_quiz_prepare( $request ) {
 	$lang = $request['lang'];
 	$category = $request['category'];
@@ -75,22 +83,24 @@ function estudia_quiz_prepare( $request ) {
 	$type = $request['type'];
 	$count = $request['count'];
 	$topic = $request['topic'] ?? '';
+	$year = $request['year'] ?? null;
 	$favorites = $request['favorites'] ?? null;
 	$seen = $request['seen'] ?? array();
 	$mode = $request['mode'] ?? 'study';
 	$minutes = $request['minutes'] ?? 15;
 	if ( ! in_array( $lang, array( 'es', 'pt' ), true ) || ! is_string( $category ) || ! is_string( $subject ) || ! is_string( $topic ) || strlen( $topic ) > 200 ||
 		( null !== $favorites && ( ! is_array( $favorites ) || count( $favorites ) > 500 ) ) ||
-		! is_array( $seen ) || count( $seen ) > 500 || ! in_array( $mode, array( 'study', 'exam' ), true ) ||
+		( null !== $year && ( ! is_int( $year ) || $year < 1900 || $year > 2100 ) ) || ! is_array( $seen ) || count( $seen ) > 500 || ! in_array( $mode, array( 'study', 'exam' ), true ) ||
 		! in_array( $type, estudia_quiz_types(), true ) || ! is_int( $count ) || $count < 1 || $count > 100 ||
 		! is_int( $minutes ) || $minutes < 1 || $minutes > 180 ||
-		! in_array( $subject, estudia_quiz_catalog( $lang )[ $category ] ?? array(), true ) ) {
+		'' === $subject || '' === $category ) {
 		return new WP_Error( 'estudia_quiz_input', 'Revisa la configuración del quiz.', array( 'status' => 400 ) );
 	}
-	$matches = array_values( array_filter( estudia_quiz_bank(), static function ( $item ) use ( $lang, $category, $subject, $type, $topic, $favorites ) {
+	$matches = array_values( array_filter( estudia_quiz_bank(), static function ( $item ) use ( $lang, $category, $subject, $type, $topic, $favorites, $year ) {
 		return $item['lang'] === $lang && $item['category'] === $category &&
 			( $item['quiz_subject'] ?? $item['subject'] ) === $subject && $item['type'] === $type &&
 			( '' === $topic || $item['topic'] === $topic ) &&
+			( null === $year || $year === ( $item['year'] ?? null ) ) &&
 			( null === $favorites || in_array( $item['id'], $favorites, true ) );
 	} ) );
 	shuffle( $matches );
@@ -112,7 +122,7 @@ function estudia_quiz_prepare( $request ) {
 		return new WP_Error( 'estudia_quiz_save', 'No se pudo iniciar el simulacro.', array( 'status' => 500 ) );
 	}
 	$public = array_map( static function ( $item ) {
-		return array_intersect_key( $item, array_flip( array( 'id', 'stem', 'options', 'origin', 'type', 'difficulty' ) ) );
+		return array_intersect_key( $item, array_flip( array( 'id', 'stem', 'options', 'origin', 'type', 'difficulty', 'exam', 'country', 'year', 'official_id' ) ) );
 	}, $items );
 	return rest_ensure_response( array( 'items' => $public, 'token' => $token, 'seconds' => $minutes * MINUTE_IN_SECONDS ) );
 }
@@ -200,9 +210,9 @@ add_shortcode( 'estudiamed_quiz', static function () {
 		return '<p><a class="btn" href="' . esc_url( $url ) . '">' . ( 'pt' === $lang ? 'Entrar para praticar' : 'Iniciar sesión para practicar' ) . '</a></p>';
 	}
 	wp_enqueue_style( 'estudia-general', plugins_url( 'assets/quiz.css', __FILE__ ), array(), '1.2.0' );
-	wp_enqueue_script( 'estudia-general', plugins_url( 'assets/quiz.js', __FILE__ ), array(), '1.2.0', true );
+	wp_enqueue_script( 'estudia-general', plugins_url( 'assets/quiz.js', __FILE__ ), array(), '1.3.0', true );
 	return '<div class="panel" data-estudia-quiz data-profile="' . esc_attr( (string) get_current_user_id() ) . '" data-topics="' . esc_attr( wp_json_encode( array( 'es' => estudia_quiz_topics( 'es' ), 'pt' => estudia_quiz_topics( 'pt' ) ) ) ) . '" data-lang="' . esc_attr( $lang ) . '" data-endpoint="' . esc_url( rest_url( 'estudiamed/v1/quiz/general' ) ) .
-		'" data-nonce="' . esc_attr( wp_create_nonce( 'wp_rest' ) ) . '"></div><noscript>JavaScript requerido.</noscript>';
+		'" data-years="' . esc_attr( wp_json_encode( (object) estudia_quiz_years() ) ) . '" data-nonce="' . esc_attr( wp_create_nonce( 'wp_rest' ) ) . '"></div><noscript>JavaScript requerido.</noscript>';
 } );
 
 require_once __DIR__ . '/admin.php';

@@ -2,6 +2,7 @@
 
 for (const root of document.querySelectorAll('[data-estudia-quiz]')) {
   const catalogs = JSON.parse(root.dataset.topics);
+  const years = JSON.parse(root.dataset.years || '{}');
   const storageKey = 'estudiamed-quiz-v1-' + root.dataset.profile;
   let saved = { favorites: [], attempts: [] };
   try {
@@ -59,6 +60,7 @@ for (const root of document.querySelectorAll('[data-estudia-quiz]')) {
       });
       result.append(list);
     }
+    if (item.exam) result.append(make('p', [item.exam, item.year, item.official_id].filter(Boolean).join(' · ')));
     if (item.source) result.append(make('p', item.source));
     if (typeof item.url === 'string' && /^https?:\/\//i.test(item.url)) {
       const link = make('a', t('Consultar referencia', 'Consultar referência'));
@@ -120,6 +122,8 @@ for (const root of document.querySelectorAll('[data-estudia-quiz]')) {
     const subject = make('select');
     const topic = make('select');
     const mode = make('select');
+    const year = make('select');
+    const yearLabel = label(t('Año', 'Ano'), year);
     const count = number(100, 1);
     const minutes = number(180, 15);
     const minutesLabel = label(t('Minutos del examen', 'Minutos da prova'), minutes);
@@ -142,7 +146,11 @@ for (const root of document.querySelectorAll('[data-estudia-quiz]')) {
       choices(subject, entries(subjectsFor(catalog[category.value])), subject.value || initial.subject);
       const topics = catalog[category.value]?.[subject.value]?.[type.value] || {};
       choices(topic, [['', t('Todos los temas', 'Todos os temas')], ...entries(Object.keys(topics))], topic.value || initial.topic);
-      const pool = topic.value ? topics[topic.value] || [] : Object.values(topics).flat();
+      const topicPool = topic.value ? topics[topic.value] || [] : Object.values(topics).flat();
+      const availableYears = [...new Set(topicPool.map(id => years[id]).filter(Boolean))].sort((a, b) => b - a).map(String);
+      choices(year, [['', t('Todos los años', 'Todos os anos')], ...entries(availableYears)], year.options.length ? year.value : String(initial.year || ''));
+      yearLabel.hidden = !availableYears.length;
+      const pool = year.value ? topicPool.filter(id => String(years[id]) === year.value) : topicPool;
       const filter = retry || (favorites.checked ? saved.favorites : null);
       const available = filter ? pool.filter(id => filter.includes(id)).length : pool.length;
       availability.textContent = available + (available === 1 ? t(' disponible con estos filtros.', ' disponível com estes filtros.') : t(' disponibles con estos filtros.', ' disponíveis com estes filtros.'));
@@ -154,9 +162,9 @@ for (const root of document.querySelectorAll('[data-estudia-quiz]')) {
     }
     form.append(label(t('Tipo de contenido', 'Tipo de conteúdo'), type), label(t('Categoría', 'Categoria'), category),
       label(t('Materia', 'Disciplina'), subject), label(t('Tema específico', 'Tema específico'), topic), label(t('Modo', 'Modo'), mode),
-      countLabel, minutesLabel, label(t('Solo favoritas', 'Apenas favoritas'), favorites), submit);
+      yearLabel, countLabel, minutesLabel, label(t('Solo favoritas', 'Apenas favoritas'), favorites), submit);
     configuration.replaceChildren(form, availability);
-    for (const input of [category, subject, topic, type, mode, favorites]) {
+    for (const input of [category, subject, topic, type, mode, favorites, year]) {
       input.addEventListener('change', () => { retry = null; status.textContent = ''; refresh(); });
     }
     refresh();
@@ -165,7 +173,7 @@ for (const root of document.querySelectorAll('[data-estudia-quiz]')) {
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (current || starting) return;
-      const settings = {type: type.value, category: category.value, subject: subject.value, topic: topic.value, mode: mode.value};
+      const settings = {type: type.value, category: category.value, subject: subject.value, topic: topic.value, mode: mode.value, year: year.value ? Number(year.value) : null};
       const prior = saved.attempts.flatMap(record => record.items.map(item => item.id)).filter(Boolean);
       const wanted = Number(count.value);
       starting = true;

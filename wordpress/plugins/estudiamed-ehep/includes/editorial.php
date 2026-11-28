@@ -59,6 +59,40 @@ add_action( 'admin_post_estudia_ehep_template', static function () {
 	exit;
 } );
 
+function estudia_quiz_import_provenance( $raw, $item ) {
+	$exam = $raw['exam'] ?? '';
+	$expected = array( 'MIR' => array( 'ES', 'es', 'MIR (España)' ), 'Revalida' => array( 'BR', 'pt', 'Revalida (Brasil)' ) );
+	$year = $raw['year'] ?? null;
+	if ( ! is_string( $exam ) || ! isset( $expected[ $exam ] ) ||
+		$expected[ $exam ] !== array( $raw['country'] ?? '', $item['lang'], $item['category'] ) ||
+		'READY' !== ( $raw['review_status'] ?? '' ) || ! is_int( $year ) || $year < 1900 || $year > 2100 ) {
+		return null;
+	}
+	$metadata = array( 'exam' => $exam, 'country' => $expected[ $exam ][0], 'year' => $year, 'review_status' => 'READY' );
+	foreach ( array( 'source_id', 'dataset_id', 'edition', 'official_id', 'source_revision', 'source_file', 'dataset_license', 'original_source' ) as $field ) {
+		if ( ! is_string( $raw[ $field ] ?? null ) || ! ( $metadata[ $field ] = sanitize_text_field( $raw[ $field ] ) ) ) {
+			return null;
+		}
+	}
+	if ( is_string( $raw['official_version'] ?? null ) ) {
+		$metadata['official_version'] = sanitize_text_field( $raw['official_version'] );
+	}
+	foreach ( array( 'stem', 'options', 'key', 'explanation', 'images' ) as $field ) {
+		$source = $raw['provenance'][ $field ] ?? '';
+		$evidence = $raw['rights'][ $field ]['evidence'] ?? '';
+		$license = $raw['rights'][ $field ]['license'] ?? '';
+		$source = is_string( $source ) ? esc_url_raw( $source, array( 'https' ) ) : '';
+		$evidence = is_string( $evidence ) ? esc_url_raw( $evidence, array( 'https' ) ) : '';
+		$license = is_string( $license ) ? sanitize_text_field( $license ) : '';
+		if ( ! $source || ! $evidence || ! $license ) {
+			return null;
+		}
+		$metadata['provenance'][ $field ] = $source;
+		$metadata['rights'][ $field ] = array( 'evidence' => $evidence, 'license' => $license );
+	}
+	return $metadata;
+}
+
 function estudia_ehep_import_normalize( $raw, $module ) {
 	if ( ! is_array( $raw ) ) return null;
 	$item = array();
@@ -87,8 +121,13 @@ function estudia_ehep_import_normalize( $raw, $module ) {
 		$item['lang'] = 'pt' === ( $raw['lang'] ?? '' ) ? 'pt' : 'es';
 		$item['difficulty'] = in_array( $raw['difficulty'] ?? '', array( 'beginner', 'intermediate', 'advanced', 'exam' ), true ) ? $raw['difficulty'] : '';
 		$item['url'] = esc_url_raw( is_string( $raw['url'] ?? null ) ? $raw['url'] : '', array( 'https', 'http' ) );
+		if ( isset( $raw['exam'] ) || isset( $raw['source_id'] ) ) {
+			$metadata = estudia_quiz_import_provenance( $raw, $item );
+			if ( null === $metadata ) return null;
+			$item += $metadata;
+		}
 		if ( ! function_exists( 'estudia_quiz_catalog' ) || ! $item['topic'] ||
-			! in_array( $item['subject'], estudia_quiz_catalog( $item['lang'] )[ $item['category'] ] ?? array(), true ) ||
+			( ! isset( $item['source_id'] ) && ! in_array( $item['subject'], estudia_quiz_catalog( $item['lang'] )[ $item['category'] ] ?? array(), true ) ) ||
 			! in_array( $item['type'], function_exists( 'estudia_quiz_types' ) ? estudia_quiz_types() : array( 'mcq', 'case' ), true ) ) return null;
 	}
 	return $item;
@@ -101,11 +140,16 @@ function estudia_ehep_stem_key( $s ) {
 function estudia_ehep_import_seen( $module ) {
 	$seen = array();
 	$items = 'ehep' === $module ? estudiamed_ehep_bank() : ( function_exists( 'estudia_quiz_bank' ) ? estudia_quiz_bank() : array() );
-	foreach ( $items as $item ) $seen[ estudia_ehep_stem_key( $item['stem'] ) ] = true;
+	foreach ( $items as $item ) {
+		$seen[ estudia_ehep_stem_key( $item['stem'] ) ] = true;
+		if ( isset( $item['source_id'] ) ) $seen[ 'source:' . $item['source_id'] ] = true;
+	}
 	$posts = get_posts( array( 'post_type' => 'estudia_ehep_item', 'post_status' => array( 'draft', 'pending' ), 'numberposts' => -1 ) );
 	foreach ( $posts as $post ) {
 		if ( $module === ( get_post_meta( $post->ID, '_estudia_question_module', true ) ?: 'ehep' ) ) {
 			$seen[ estudia_ehep_stem_key( $post->post_title ) ] = true;
+		$item = get_post_meta( $post->ID, '_estudia_ehep', true );
+		if ( isset( $item['source_id'] ) ) $seen[ 'source:' . $item['source_id'] ] = true;
 		}
 	}
 	return $seen;
@@ -147,10 +191,12 @@ add_action( 'admin_post_estudia_ehep_preview', static function () {
 			$status = 'Campos incompletos, clave inválida o clasificación incorrecta.';
 			if ( $item ) {
 				$hash = estudia_ehep_stem_key( $item['stem'] );
-				$status = isset( $seen[ $hash ] ) ? 'Duplicada' : 'Válida';
-				if ( ! isset( $seen[ $hash ] ) ) {
+				$duplicate = isset( $seen[ $hash ] ) || isset( $seen[ 'source:' . ( $item['source_id'] ?? '' ) ] );
+				$status = $duplicate ? 'Duplicada' : 'Válida';
+				if ( ! $duplicate ) {
 					$batch['rows'][] = $item;
 					$seen[ $hash ] = true;
+					if ( isset( $item['source_id'] ) ) $seen[ 'source:' . $item['source_id'] ] = true;
 				}
 			}
 			$batch['messages'][] = array( $index + 1, $item['stem'] ?? '', $status );
@@ -160,6 +206,23 @@ add_action( 'admin_post_estudia_ehep_preview', static function () {
 	estudia_ehep_import_redirect();
 } );
 
+function estudia_ehep_import_drafts( $rows, $module ) {
+	$count = 0;
+	$seen = estudia_ehep_import_seen( $module );
+	foreach ( $rows as $item ) {
+		$hash = estudia_ehep_stem_key( $item['stem'] );
+		if ( isset( $seen[ $hash ] ) || isset( $seen[ 'source:' . ( $item['source_id'] ?? '' ) ] ) ) continue;
+		$id = wp_insert_post( array( 'post_type' => 'estudia_ehep_item', 'post_status' => 'draft', 'post_title' => wp_slash( $item['stem'] ),
+			'meta_input' => array( '_estudia_ehep' => wp_slash( $item ), '_estudia_question_module' => $module ) ), true );
+		if ( ! is_wp_error( $id ) && $id ) {
+			++$count;
+			$seen[ $hash ] = true;
+			if ( isset( $item['source_id'] ) ) $seen[ 'source:' . $item['source_id'] ] = true;
+		}
+	}
+	return $count;
+}
+
 add_action( 'admin_post_estudia_ehep_commit', static function () {
 	estudia_ehep_guard( 'estudia_ehep_commit' );
 	$token = 'estudia_import_' . get_current_user_id();
@@ -167,17 +230,7 @@ add_action( 'admin_post_estudia_ehep_commit', static function () {
 	$count = 0;
 	if ( $batch ) {
 		delete_transient( $token );
-		$seen = estudia_ehep_import_seen( $batch['module'] );
-		foreach ( $batch['rows'] as $item ) {
-			$hash = estudia_ehep_stem_key( $item['stem'] );
-			if ( isset( $seen[ $hash ] ) ) continue;
-			$id = wp_insert_post( array( 'post_type' => 'estudia_ehep_item', 'post_status' => 'draft', 'post_title' => wp_slash( $item['stem'] ),
-				'meta_input' => array( '_estudia_ehep' => wp_slash( $item ), '_estudia_question_module' => $batch['module'] ) ), true );
-			if ( ! is_wp_error( $id ) && $id ) {
-				++$count;
-				$seen[ $hash ] = true;
-			}
-		}
+		$count = estudia_ehep_import_drafts( $batch['rows'], $batch['module'] );
 	}
 	estudia_ehep_import_redirect( array( 'saved' => $count ) );
 } );

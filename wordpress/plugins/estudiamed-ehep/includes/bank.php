@@ -110,6 +110,10 @@ function estudiamed_ehep_save_item( $id ) {
 	if ( isset( $_POST['ehep_url'] ) && is_string( $_POST['ehep_url'] ) ) {
 		$item['url'] = esc_url_raw( wp_unslash( $_POST['ehep_url'] ), array( 'https', 'http' ) );
 	}
+	$prior = get_post_meta( $id, '_estudia_ehep', true );
+	if ( 'general' === $module && isset( $prior['source_id'] ) ) {
+		$item += array_intersect_key( $prior, array_flip( array( 'source_id', 'dataset_id', 'exam', 'country', 'year', 'edition', 'official_id', 'official_version', 'source_revision', 'source_file', 'dataset_license', 'original_source', 'review_status', 'provenance', 'rights' ) ) );
+	}
 	update_post_meta( $id, '_estudia_question_module', $module );
 	update_post_meta( $id, '_estudia_ehep', wp_slash( $item ) );
 }
@@ -156,7 +160,7 @@ function estudiamed_ehep_bank() {
 add_filter( 'estudia_quiz_editorial_items', static function ( $bank ) {
 	foreach ( estudiamed_ehep_editorial_items( 'general' ) as $item ) {
 		if ( empty( $item['archived'] ) && ! empty( $item['explanation'] ) &&
-			in_array( $item['subject'], estudia_quiz_catalog( $item['lang'] ?? 'es' )[ $item['category'] ?? '' ] ?? array(), true ) &&
+			( isset( $item['source_id'] ) || in_array( $item['subject'], estudia_quiz_catalog( $item['lang'] ?? 'es' )[ $item['category'] ?? '' ] ?? array(), true ) ) &&
 			in_array( $item['type'] ?? '', ( function_exists( 'estudia_quiz_types' ) ? estudia_quiz_types() : array( 'mcq', 'case' ) ), true ) ) {
 			$bank[] = $item + array( 'lang' => 'es', 'origin' => 'bank' );
 		}
